@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaPath — Interactive Prototype (B.Pharm Exam Companion)</title>
+<style>
+:root{
+  --bg:#F4F8FC; --card:#FFFFFF; --ink:#16324F; --muted:#5A7590;
+  --primary:#2E6FB7; --psoft:#E3EEF9; --accent:#4F9DDE;
+  --gold:#9A7B1E; --gsoft:#FBF3DC; --ok:#2E8B6D; --oksoft:#E4F4EE;
+  --bad:#B4442E; --badsoft:#FBE9E4; --border:#D9E5F0; --nav:#FFFFFF;
+}
+body.dark{
+  --bg:#0E1B2C; --card:#16283F; --ink:#D7E6F5; --muted:#8FA9C4;
+  --primary:#5B9BD5; --psoft:#1D3550; --accent:#6FB3EA;
+  --gold:#D9B64E; --gsoft:#2A2A1C; --ok:#4CBF97; --oksoft:#12332A;
+  --bad:#E07A5F; --badsoft:#3A211B; --border:#243B55; --nav:#13243A;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font:15px/1.6 'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;transition:background .3s,color .3s}
+.app{max-width:760px;margin:0 auto;padding:0 14px 96px}
+/* top bar */
+.topbar{position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 4px 10px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(6px)}
+.brand{font-weight:800;font-size:17px;color:var(--primary);letter-spacing:.2px;cursor:pointer;white-space:nowrap}
+.brand small{display:block;font-size:9.5px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.spacer{flex:1}
+.tbtn{border:1px solid var(--border);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.tbtn.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.tbtn.small{padding:5px 10px;font-size:11.5px}
+/* bottom nav */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:760px;background:var(--nav);border-top:1px solid var(--border);display:flex;z-index:40;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.nav button{flex:1;background:none;border:none;color:var(--muted);font-size:10.5px;font-weight:700;padding:6px 2px;cursor:pointer;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav button .ic{font-size:19px;line-height:1}
+.nav button.on{color:var(--primary)}
+.nav button.on .ic{filter:drop-shadow(0 1px 2px rgba(46,111,183,.4))}
+/* generic */
+h2{font-size:21px;margin:6px 0 2px}
+h3{font-size:16px;margin:14px 0 6px;color:var(--primary)}
+.sub{color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:10px 0;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.card:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,111,183,.10)}
+.card:active{transform:scale(.985)}
+.card h4{font-size:14.5px;margin-bottom:2px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}}
+.semcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer}
+.semcard .n{font-size:20px;font-weight:800;color:var(--primary)}
+.semcard .t{font-size:10.5px;color:var(--muted);font-weight:600}
+.semcard.cur{border-color:var(--primary);background:var(--psoft)}
+.bar{height:4px;background:var(--psoft);border-radius:99px;margin:7px 10px 0;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--primary);border-radius:99px}
+.pill{display:inline-block;background:var(--psoft);color:var(--primary);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;margin:2px 4px 2px 0}
+.pill.gold{background:var(--gsoft);color:var(--gold)}
+.pill.ok{background:var(--oksoft);color:var(--ok)}
+.pill.bad{background:var(--badsoft);color:var(--bad)}
+.pill.ghost{background:transparent;border:1px dashed var(--border);color:var(--muted)}
+.btn{display:inline-block;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:800;cursor:pointer;text-align:center}
+.btn.ghost{background:var(--card);color:var(--primary);border:1.5px solid var(--primary)}
+.btn.gold{background:var(--gold);color:#fff}
+.btn.block{display:block;width:100%;margin:8px 0}
+.btn.small{padding:7px 13px;font-size:12.5px;border-radius:9px}
+input[type=text],select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:14.5px;background:var(--card);color:var(--ink);outline:none}
+input:focus,select:focus{border-color:var(--primary)}
+.searchwrap{position:relative}
+.searchwrap input{padding-left:38px}
+.searchwrap .sic{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted)}
+.banner{background:linear-gradient(120deg,#2E6FB7,#4F9DDE);color:#fff;border-radius:14px;padding:14px 16px;margin:12px 0;display:flex;align-items:center;gap:12px}
+.banner.gold{background:linear-gradient(120deg,#8A6D1A,#B8952E)}
+.banner .bt{font-weight:800;font-size:14px}
+.banner .bs{font-size:12px;opacity:.9}
+.row{display:flex;align-items:center;gap:10px;padding:12px 2px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row .ic{font-size:20px;width:34px;text-align:center}
+.row .grow{flex:1;min-width:0}
+.row .grow b{display:block;font-size:14px}
+.row .grow span{font-size:12px;color:var(--muted)}
+.back{background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink);padding:2px 8px 2px 0}
+/* note screen */
+.point{display:flex;gap:10px;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:14.8px;line-height:1.62}
+.point .no{font-weight:800;color:var(--primary);font-size:12.5px;padding-top:2px}
+.stepbox{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:8px 0;position:relative}
+.stepbox .sn{position:absolute;top:-9px;left:12px;background:var(--primary);color:#fff;font-size:10.5px;font-weight:800;border-radius:99px;padding:1px 9px}
+.stepbox b{display:block;font-size:14px}
+.stepbox span{font-size:12.5px;color:var(--muted)}
+.arrowdown{text-align:center;color:var(--accent);font-size:16px;margin:-2px 0}
+.lock{filter:blur(3.5px);pointer-events:none;user-select:none;opacity:.55}
+.lockwrap{position:relative}
+.lockbadge{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(244,248,252,.55);border-radius:12px;z-index:5}
+body.dark .lockbadge{background:rgba(14,27,44,.55)}
+/* scanner */
+.drop{background:var(--card);border:2px dashed var(--accent);border-radius:14px;padding:26px 16px;text-align:center;cursor:pointer;margin:12px 0}
+.drop .ic{font-size:34px}
+.drop b{display:block;margin:6px 0 2px}
+.itemrow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin:7px 0}
+.itemrow input{width:18px;height:18px;accent-color:var(--primary);cursor:pointer}
+.itemrow .st{margin-left:auto;font-size:11px;font-weight:800}
+.strict{background:var(--gsoft);border:1px solid #E8D9A8;color:var(--gold);border-radius:10px;padding:10px 12px;font-size:12.8px;font-weight:700;margin:10px 0}
+body.dark .strict{border-color:#5A4E24}
+.checkbadge{background:var(--oksoft);border:1px solid #BFE3D6;color:var(--ok);border-radius:10px;padding:9px 12px;font-size:12.8px;font-weight:700;margin:8px 0}
+body.dark .checkbadge{border-color:#2E5B4A}
+/* profile rows */
+.setrow{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--border)}
+.setrow .grow{flex:1}
+.setrow .grow b{font-size:14px}
+.setrow .grow span{font-size:12px;color:var(--muted)}
+.switch{width:46px;height:26px;border-radius:99px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.switch.on{background:var(--primary)}
+.switch.on:after{left:23px}
+.resulthit{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:7px 0;cursor:pointer}
+.resulthit b{font-size:14px;display:block}
+.resulthit span{font-size:12px;color:var(--muted)}
+.flashcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px 22px;text-align:center;min-height:150px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;cursor:pointer;margin:12px 0}
+.sectiontitle{font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:18px 0 4px}
+.sampleimg{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff}
+.fade{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.note{font-size:12px;color:var(--muted);margin-top:2px}
+.bigtitle{font-size:22px;font-weight:800;margin:8px 0 2px}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){try{navigator.serviceWorker.register("sw.js").catch(function(){})}catch(e){}})}</script>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand" onclick="go('home')">💊 PharmaPath<small>B.Pharm Exam Companion</small></div>
+    <div class="spacer"></div>
+    <button class="tbtn" id="langBtn" onclick="toggleLang()">🌐 English</button>
+    <button class="tbtn" id="nightBtn" onclick="toggleNight()">🌙</button>
+  </div>
+  <div id="screen"></div>
+</div>
+<div class="nav">
+  <button id="nav-home" onclick="go('home')"><span class="ic">🏠</span>Home</button>
+  <button id="nav-search" onclick="go('search')"><span class="ic">🔍</span>Search</button>
+  <button id="nav-scanner" onclick="go('scanner')"><span class="ic">📷</span>Scanner</button>
+  <button id="nav-vault" onclick="go('vault')"><span class="ic">💎</span>Vault</button>
+  <button id="nav-profile" onclick="go('profile')"><span class="ic">👤</span>Profile</button>
+</div>
+<script>
+/* ============================================================
+   PharmaPath prototype — data layer (mirrors the DB schema)
+   ============================================================ */
+const S={lang:'en',night:false,user:{name:'Riya',sem:4,plan:'free'},screen:'home',
+  ctx:{},scanSel:{},scanStatus:'idle',fcIdx:0,fcFlip:false};
+
+const SEMS=[
+ {n:1,cat:'Foundation',subs:[['Human Anatomy & Physiology I','BP101T','🧬'],['Pharmaceutical Analysis I','BP102T','⚖️'],['Pharmaceutics I','BP103T','💊'],['Pharmaceutical Inorganic Chemistry','BP104T','🧪'],['Communication Skills','BP105T','🗣️'],['Remedial Biology / Maths','BP106RBT','🌱']]},
+ {n:2,cat:'Foundation',subs:[['Human Anatomy & Physiology II','BP201T','🧬'],['Pharmaceutical Organic Chemistry I','BP202T','⚗️'],['Biochemistry','BP203T','🧫'],['Pathophysiology','BP204T','🩺'],['Computer Applications in Pharmacy','BP205T','💻'],['Environmental Sciences','BP206T','🌍']]},
+ {n:3,cat:'Foundation',subs:[['Pharmaceutical Organic Chemistry II','BP301T','⚗️'],['Physical Pharmaceutics I','BP302T','🔭'],['Pharmaceutical Microbiology','BP303T','🦠'],['Pharmaceutical Engineering','BP304T','🏭']]},
+ {n:4,cat:'Core Medical',subs:[['Pharmaceutical Organic Chemistry III','BP401T','⚗️'],['Medicinal Chemistry I','BP402T','🧬'],['Physical Pharmaceutics II','BP403T','🔭'],['Pharmacology I','BP404T','💊'],['Pharmacognosy & Phytochemistry I','BP405T','🌿']]},
+ {n:5,cat:'Core Medical',subs:[['Medicinal Chemistry II','BP501T','🧬'],['Pharmacology II','BP502T','💊'],['Pharmacognosy & Phytochemistry II','BP503T','🌿'],['Pharmaceutical Jurisprudence','BP504T','⚖️'],['Industrial Pharmacy I','BP505T','🏭']]},
+ {n:6,cat:'Core Medical',subs:[['Medicinal Chemistry III','BP601T','🧬'],['Pharmacology III','BP602T','💊'],['Herbal Drug Technology','BP603T','🌿'],['Biopharmaceutics & Pharmacokinetics','BP604T','📈'],['Pharmaceutical Biotechnology','BP605T','🧫'],['Quality Assurance','BP606T','✅']]},
+ {n:7,cat:'Advanced & Clinical',subs:[['Instrumental Methods of Analysis','BP701T','🔬'],['Industrial Pharmacy II','BP702T','🏭'],['Pharmacy Practice','BP703T','🏥'],['Novel Drug Delivery Systems','BP704T','🎯']]},
+ {n:8,cat:'Advanced & Clinical',subs:[['Biostatistics & Research Methodology','BP801T','📊'],['Social & Preventive Pharmacy','BP802T','🤝'],['Electives (12) — Pharmacovigilance, CADD, Cosmetic Sci…','BP803ET+','📚']]}
+];
+/* curated notes: sem, subject name, units, points en/hinglish, flowchart */
+const NOTES={
+ 'Tetracycline — Mechanism of Action':{sem:5,sub:'Pharmacology II',unit:5,marks:10,type:'drug',
+  en:['Enters bacterial cell by passive diffusion through porin channels','Binds reversibly to the 30S ribosomal subunit','Blocks binding of aminoacyl-tRNA at the A-site','Protein synthesis stops → bacteriostatic action','Resistance: efflux pumps + ribosomal protection proteins','Uses: acne, cholera, plague, rickettsial infections','Side effects: GI irritation, photosensitivity, tooth staining'],
+  hi:['Porin channels se passive diffusion ke through bacteria ke andar jata hai','30S ribosomal subunit se reversibly bind hota hai','A-site par aminoacyl-tRNA ko bind hone se rokta hai','Protein synthesis ruk jati hai → bacteriostatic effect','Resistance: efflux pumps aur ribosomal protection proteins','Uses: acne, cholera, plague, rickettsial infections','Side effects: GI irritation, photosensitivity, dant par stain'],
+  flow:{title:'Mechanism — step by step',steps:[['Diffusion via porins','Porins se andar ghusta hai'],['Binds 30S subunit','30S subunit se judta hai'],['Blocks tRNA at A-site','A-site par tRNA block hota hai'],['Protein synthesis stops','Protein banana band ho jata hai']]}},
+ 'Malaria — Plasmodium Life Cycle (Etiology)':{sem:5,sub:'Pharmacology II',unit:5,marks:10,type:'flowchart',
+  en:['Etiology: Plasmodium species (vivax, falciparum, malariae, ovale)','Transmitted by female Anopheles mosquito bite','Sporozoites enter blood → reach liver (exo-erythrocytic cycle)','Liver schizogony → merozoites released into blood','Merozoites invade RBCs → erythrocytic schizogony','RBC rupture → periodic fever (48h = tertian malaria)','Some forms become gametocytes → taken by mosquito','Sporogony in mosquito completes the cycle'],
+  hi:['Etiology: Plasmodium species (vivax, falciparum, malariae, ovale)','Female Anopheles mosquito ke kaatne se hota hai','Sporozoites blood mein aate hain → liver mein jate hain','Liver mein multiplication → merozoites blood mein','Merozoites RBC mein ghus kar grow karte hain','RBC phatne par 48 ghante mein bukhar aata hai (tertian)','Gametocytes mosquito mein jate hain','Mosquito ke andar cycle complete hoti hai (sporogony)'],
+  flow:{title:'Life cycle — step by step',steps:[['Mosquito bite → sporozoites','Mosquito ke kaatne se sporozoites aate hain'],['Liver: hepatic schizogony','Liver mein multiplication hoti hai'],['RBC: erythrocytic schizogony','RBC mein multiplication + rupture'],['Fever cycles + gametocytes','Bukhar + gametocytes banate hain'],['Mosquito: sporogony','Mosquito mein cycle complete']]}},
+ 'Chloroquine — Mechanism of Action':{sem:5,sub:'Pharmacology II',unit:5,marks:5,type:'drug',
+  en:['Concentrates inside the parasite\'s food vacuole','Raises vacuolar pH → inhibits haem polymerase enzyme','Toxic free haem accumulates → kills the parasite','Used for: malaria (all species), amoebic liver abscess','Resistance common in P. falciparum (many regions)'],
+  hi:['Parasite ke food vacuole ke andar concentrate hota hai','Vacuole ka pH badhata hai → haem polymerase enzyme block','Toxic free haem accumulate ho kar parasite ko marta hai','Uses: malaria (sabhi species), amoebic liver abscess','P. falciparum mein resistance common hai']},
+ 'Ayurvedic Formulations — Asava & Arishta':{sem:5,sub:'Pharmacognosy & Phytochemistry II',unit:3,marks:5,type:'topic',
+  en:['Asava = fermented decoction of herbs; Arishta = fermented infusion','Self-generated alcohol (6–10%) acts as preservative + vehicle','Method: drug powder + jaggery/honey + water → fermentation','Uses: improves absorption, palatable, stable for 2+ years','Examples: Ashokarishta, Drakshasava, Arjunarishta'],
+  hi:['Asava = herbs ka fermented decoction; Arishta = fermented infusion','Kudrat se bana alcohol (6–10%) preserve karta hai','Method: powder + jaggery/honey + water → fermentation','Benefits: absorption badhta hai, taste achhi, 2+ saal stable','Examples: Ashokarishta, Drakshasava, Arjunarishta']},
+ 'Gene Transfer Techniques — Introduction':{sem:6,sub:'Pharmaceutical Biotechnology',unit:4,marks:10,type:'topic',
+  en:['Gene transfer = introducing foreign DNA into host cells','Direct methods: electroporation, microinjection, gene gun (biolistics)','Chemical methods: calcium phosphate, liposomes, DEAE-dextran','Biological method: viral vectors (retrovirus, adenovirus)','Bacterial method: transformation, conjugation, transduction','Selection: antibiotic resistance markers identify successful clones'],
+  hi:['Gene transfer = foreign DNA ko host cell mein dalna','Direct methods: electroporation, microinjection, gene gun','Chemical methods: calcium phosphate, liposomes, DEAE-dextran','Biological method: viral vectors (retrovirus, adenovirus)','Bacterial method: transformation, conjugation, transduction','Selection: antibiotic marker se successful clones pehchante hain'],
+  flow:{title:'Cloning flow — step by step',steps:[['Isolate gene of interest','Target gene alag karo'],['Insert into vector (plasmid)','Vector mein insert karo'],['Transform host cell','Host cell mein dalo'],['Select + multiply (cloning)','Selection karke multiply karo']]}},
+ 'NDDS — Introduction & Classification':{sem:7,sub:'Novel Drug Delivery Systems',unit:1,marks:10,type:'topic',
+  en:['NDDS = systems that control rate, time and site of drug release','Goals: sustained release, reduced dosing frequency, less toxicity','Classification: rate-programmed, activation-modulated, feedback-regulated','Carriers: liposomes, niosomes, nanoparticles, microspheres','Examples: transdermal patches, osmotic pumps, ocular inserts'],
+  hi:['NDDS = drug release ki rate, time aur site control karne wale systems','Goals: sustained release, kam dose frequency, kam toxicity','Classification: rate-programmed, activation-modulated, feedback-regulated','Carriers: liposomes, niosomes, nanoparticles, microspheres','Examples: transdermal patches, osmotic pumps, ocular inserts']},
+ 'Biostatistics — Measures of Central Tendency':{sem:8,sub:'Biostatistics & Research Methodology',unit:1,marks:10,type:'topic',
+  en:['Mean = sum of observations ÷ number of observations','Median = middle value when data arranged in order','Mode = most frequently occurring value','Mean suits symmetrical data; median suits skewed data','Use: summarizing drug trial results, QC batch data'],
+  hi:['Mean = saare observations ka sum ÷ observations ki sankhya','Median = data ko order mein rakhne par beech wali value','Mode = jo value sabse zyada baar aati hai','Symmetrical data mein mean, skewed data mein median use karo','Use: drug trial results aur QC batch data summarize karna']},
+ 'Structure of the Cell':{sem:1,sub:'Human Anatomy & Physiology I',unit:1,marks:10,type:'topic',
+  en:['Cell = basic structural & functional unit of the body','Three main parts: cell membrane, cytoplasm, nucleus','Cell membrane: lipid bilayer + proteins (selective permeability)','Cytoplasm: contains organelles (mitochondria, ER, Golgi…)','Nucleus: contains DNA (genetic material)'],
+  hi:['Cell = body ki sabse chhoti structural & functional unit','Teen main parts: cell membrane, cytoplasm, nucleus','Cell membrane: lipid bilayer + proteins (selective permeability)','Cytoplasm: organelles hoti hain (mitochondria, ER, Golgi…)','Nucleus: DNA (genetic material) hota hai']},
+ 'Dosage Forms — Classification':{sem:1,sub:'Pharmaceutics I',unit:1,marks:10,type:'topic',
+  en:['Solid: tablets, capsules, powders, granules','Semisolid: ointments, creams, gels, pastes, suppositories','Liquid: solutions, suspensions, emulsions, syrups','Sterile: injections, eye drops, infusions','Gaseous: inhalations, aerosols'],
+  hi:['Solid: tablets, capsules, powders, granules','Semisolid: ointments, creams, gels, pastes, suppositories','Liquid: solutions, suspensions, emulsions, syrups','Sterile: injections, eye drops, infusions','Gaseous: inhalations, aerosols']}
+};
+const PYQS={ 'Pharmacology II':[
+  {y:2023,q:'Explain mechanism of action of tetracycline.',m:10,note:'Tetracycline — Mechanism of Action'},
+  {y:2022,q:'Describe the life cycle of Plasmodium and discuss treatment of malaria.',m:10,note:'Malaria — Plasmodium Life Cycle (Etiology)'},
+  {y:2023,q:'Write a note on mechanism of action of chloroquine.',m:5,note:'Chloroquine — Mechanism of Action'},
+  {y:2021,q:'Classify antibiotics with examples.',m:10}],
+ 'Pharmaceutical Biotechnology':[{y:2023,q:'Explain gene transfer techniques in detail.',m:10,note:'Gene Transfer Techniques — Introduction'}],
+ 'Novel Drug Delivery Systems':[{y:2023,q:'Classify novel drug delivery systems with examples.',m:10,note:'NDDS — Introduction & Classification'}],
+ 'Biostatistics & Research Methodology':[{y:2022,q:'Define mean, median and mode with examples.',m:10,note:'Biostatistics — Measures of Central Tendency'}]};
+const FLASHCARDS=[
+ {f:['Which drug binds the 30S ribosomal subunit?','Kaunsi drug 30S ribosomal subunit se bind hoti hai?'],b:['Tetracycline','Tetracycline']},
+ {f:['Tetracycline ka action kya hai? (bactericidal/bacteriostatic)','Tetracycline ka action kya hai?'],b:['Bacteriostatic — stops protein synthesis','Bacteriostatic — protein synthesis rokta hai']},
+ {f:['Malaria ka causative parasite?','Malaria kis parasite se hota hai?'],b:['Plasmodium (vivax, falciparum…)','Plasmodium species']},
+ {f:['Asava kya hai?','Asava kya hota hai?'],b:['Fermented decoction of herbs','Herbs ka fermented decoction']}];
+const DRUGLIB=['Tetracycline','Chloroquine','Sulfonamides','Chloramphenicol','Erythromycin','Griseofulvin','Metformin','Amoxicillin','Omeprazole','Paracetamol'];
+/* scanner mock — the "image" is this list; the AI "extracts" exactly it */
+const SCAN_IMAGE=['Tetracycline','Sulfonamides','Chloramphenicol','Erythromycin','Griseofulvin'];
+const SCAN_GEN={ // library + generated fallbacks
+ 'Sulfonamides':['Inhibit dihydropteroate synthase (folate synthesis)','Block folic acid synthesis → bacteria cannot make DNA','Bacteriostatic; used: UTI, nocardiosis, toxoplasmosis','Combined with trimethoprim (co-trimoxazole) for synergy'],
+ 'Chloramphenicol':['Binds 50S ribosomal subunit','Inhibits peptidyl transferase → protein synthesis stops','Bacteriostatic; broad-spectrum','Warning: aplastic anaemia — reserve for typhoid, meningitis'],
+ 'Erythromycin':['Binds 50S ribosomal subunit (reversible)','Blocks translocation → stops protein synthesis','Bacteriostatic; macrolide class','Uses: respiratory infections, whooping cough, legionnaires'],
+ 'Griseofulvin':['Fungistatic — binds microtubules (keratin affinity)','Deposits in new keratin → fungus cannot grow','Oral use: dermatophyte skin/nail infections','Take with fatty food for better absorption']};
+const HINGLISH_GEN={
+ 'Sulfonamides':['Dihydropteroate synthase ko block karta hai (folate banane wala enzyme)','Folic acid nahi banta → bacteria DNA nahi bana pata','Bacteriostatic; uses: UTI, nocardiosis, toxoplasmosis','Trimethoprim ke saath milakar (co-trimoxazole) strong effect'],
+ 'Chloramphenicol':['50S ribosomal subunit se bind hota hai','Peptidyl transferase block → protein synthesis rukta hai','Bacteriostatic; broad-spectrum','Dhyan rakhein: aplastic anaemia — sirf typhoid, meningitis mein'],
+ 'Erythromycin':['50S ribosomal subunit se reversibly bind hota hai','Translocation block → protein synthesis rukti hai','Bacteriostatic; macrolide class','Uses: respiratory infection, whooping cough, legionnaires'],
+ 'Griseofulvin':['Fungistatic — microtubules se bind (keratin affinity)','Naye keratin mein jama ho kar fungus ko rokta hai','Oral use: dermatophyte skin/nail infection','Fatty food ke saath lo — absorption badhta hai']};
+
+/* ============================================================
+   renderer
+   ============================================================ */
+const el=id=>document.getElementById(id);
+function L(en,hi){return S.lang==='en'?en:hi}
+function t(e,t){return t?`<span class="sub">${t}</span>`:''}
+function render(){
+  const scr=el('screen');
+  const m={home:renderHome,sem:renderSem,subject:renderSubject,note:renderNote,
+    search:renderSearch,scanner:renderScanner,vault:renderVault,profile:renderProfile}[S.screen];
+  scr.innerHTML=`<div class="fade">${m()}</div>`;
+  el('langBtn').textContent=S.lang==='en'?'🌐 English':(S.lang==='hinglish'?'🌐 Hinglish':'🌐 हिंदी');
+  el('langBtn').classList.toggle('on',S.lang!=='en');
+  el('nightBtn').classList.toggle('on',S.night);
+  document.body.classList.toggle('dark',S.night);
+  ['home','search','scanner','vault','profile'].forEach(n=>{
+    el('nav-'+n).classList.toggle('on',S.screen===n);
+  });
+  scr.scrollTop=0;window.scrollTo(0,0);
+}
+function go(s,ctx){S.screen=s;if(ctx)S.ctx=ctx;render()}
+function toggleLang(){S.lang=S.lang==='en'?'hinglish':(S.lang==='hinglish'?'hi':'en');render()}
+function toggleNight(){S.night=!S.night;render()}
+function pct(sem){return Math.min(100,10*sem)}
+function noteByTitle(t){return NOTES[t]}
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  const u=S.user;
+  const prog=[18,10,0,35,8,0,0,0];
+  return `
+  <h2>Namaste, ${u.name} 👋</h2>
+  <p class="sub">Semester ${u.sem} chal raha hai — ${SEMS[u.sem-1].cat}. Continue karo, exam khud ayega!</p>
+  <div class="searchwrap" style="margin-top:12px">
+    <span class="sic">🔍</span>
+    <input type="text" id="homeSearch" placeholder="Kuch bhi dhundho — drug, subject, question…" oninput="quickSearch(this.value)" onfocus="go('search')">
+  </div>
+  <div class="banner" onclick="go('scanner')">
+    <div style="font-size:26px">📷</div>
+    <div><div class="bt">Scan my syllabus / question paper</div>
+    <div class="bs">Upload screenshot → notes sirf image wale items ke — koi extra nahi</div></div>
+  </div>
+  <div class="sectiontitle">Your journey — Semester 1 to 8</div>
+  <div class="grid">
+    ${SEMS.map((s,i)=>`
+    <div class="semcard ${s.n===u.sem?'cur':''}" onclick="go('sem',{n:s.n})">
+      <div class="n">${s.n}</div>
+      <div class="t">${s.subs.length} subjects</div>
+      <div class="bar"><i style="width:${prog[i]}%"></i></div>
+    </div>`).join('')}
+  </div>
+  <div class="sectiontitle">Tracks</div>
+  <div>
+    <span class="pill">🧪 Foundation · Sem 1–3</span>
+    <span class="pill">💊 Core Medical · Sem 4–6</span>
+    <span class="pill">🏥 Advanced &amp; Clinical · Sem 7–8</span>
+  </div>
+  ${u.plan==='free'?`<div class="banner gold" onclick="go('vault')">
+    <div style="font-size:26px">💎</div>
+    <div><div class="bt">Premium — full units + RUHS solved papers</div>
+    <div class="bs">₹499/saal · sem pack ₹99 · PYQ pack ₹49</div></div>
+  </div>`:''}
+  <div class="sectiontitle">Continue studying</div>
+  <div class="card" onclick="go('note',{t:'Tetracycline — Mechanism of Action'})">
+    <h4>💊 Tetracycline — Mechanism of Action</h4>
+    <span class="sub">Pharmacology II · Unit 5 · 10 marks · ⭐ flowchart available</span>
+  </div>
+  <div class="card" onclick="go('note',{t:'Malaria — Plasmodium Life Cycle (Etiology)'})">
+    <h4>🦠 Malaria — Plasmodium Life Cycle</h4>
+    <span class="sub">Pharmacology II · Unit 5 · etiology + treatment context</span>
+  </div>`;
+}
+function quickSearch(q){if(q.length>1)go('search')}
+
+/* ---------- SEMESTER ---------- */
+function renderSem(){
+  const s=SEMS[S.ctx.n-1];
+  return `
+  <button class="back" onclick="go('home')">← Back</button>
+  <h2>Semester ${s.n}</h2>
+  <span class="pill">${s.cat}</span>
+  <div class="sectiontitle">Subjects (${s.subs.length})</div>
+  ${s.subs.map(x=>`
+  <div class="card" onclick="go('subject',{sem:${s.n},name:'${x[0].replace(/'/g,"\\'")}'})">
+    <div style="display:flex;gap:12px;align-items:center">
+      <span style="font-size:22px">${x[2]}</span>
+      <div class="grow">
+        <h4>${x[0]}</h4>
+        <span class="sub">${x[1]} · Unit 1–5</span>
+      </div>
+      <span class="pill ghost">${Object.values(NOTES).filter(n=>n.sem===s.n&&n.sub===x[0]).length? '📖 notes':'soon'}</span>
+    </div>
+  </div>`).join('')}
+  <div class="banner gold" onclick="go('vault')">📄 RUHS previous papers — Sem ${s.n} (2019–2024) · <b>premium</b></div>`;
+}
+
+/* ---------- SUBJECT ---------- */
+function renderSubject(){
+  const c=S.ctx;const s=SEMS[c.sem-1];
+  const subNotes=Object.entries(NOTES).filter(([t,n])=>n.sub===c.name);
+  const units=[...new Set(subNotes.map(([,n])=>n.unit))].sort();
+  const pyq=PYQS[c.name]||[];
+  return `
+  <button class="back" onclick="go('sem',{n:${c.sem}})">← Semester ${c.sem}</button>
+  <h2>${c.name}</h2>
+  <span class="pill">${s.cat}</span><span class="pill ghost">${subNotes.length} curated notes</span>
+  <div style="display:flex;gap:8px;margin:12px 0">
+    <button class="btn small ghost" onclick="subTab('units')">📚 Units</button>
+    <button class="btn small ghost" onclick="subTab('qs')">❓ Important Qs</button>
+    <button class="btn small ghost" onclick="subTab('pyq')">📄 PYQs</button>
+    <button class="btn small ghost" onclick="subTab('fc')">🃏 Flashcards</button>
+  </div>
+  <div id="subtab"></div>`;
+}
+function subTab(t){
+  const c=S.ctx;
+  const subNotes=Object.entries(NOTES).filter(([,n])=>n.sub===c.name);
+  const units=[...new Set(subNotes.map(([,n])=>n.unit))].sort();
+  const pyq=PYQS[c.name]||[];
+  let html='';
+  if(t==='units'){
+    html=units.map(u=>`
+      <div class="sectiontitle">Unit ${u}</div>
+      ${subNotes.filter(([,n])=>n.unit===u).map(([title,n])=>`
+      <div class="card" onclick="go('note',{t:'${title.replace(/'/g,"\\'")}'})">
+        <div style="display:flex;gap:10px;align-items:center">
+          <span style="font-size:18px">${n.type==='drug'?'💊':n.type==='flowchart'?'🧩':'📘'}</span>
+          <div class="grow"><h4>${title}</h4>
+          <span class="sub">${n.marks} marks · ${n.en.length} points · ${n.flow?'⭐ flowchart':''}</span></div>
+        </div>
+      </div>`).join('')}
+      ${units.length?`<div class="lockwrap"><div class="card"><h4>🔒 ${c.name} — Unit-wise deep notes (premium)</h4><span class="sub">Solved 10-mark answers + diagrams + mnemonics</span></div>
+      <div class="lockbadge"><b>💎 Premium content</b><button class="btn gold small" onclick="go('vault')">Unlock</button></div></div>`:''}`).join('');
+    if(!units.length)html=`<div class="card"><h4>📖 Notes is semester par jald aa rahe hain</h4><span class="sub">Meanwhile: Scanner se apna syllabus upload karke notes banao — instant!</span></div>`;
+  }else if(t==='qs'){
+    html=pyq.map(q=>`<div class="card" onclick="${q.note?`go('note',{t:'${q.note.replace(/'/g,"\\'")}'})`:''}">
+      <h4>📝 ${q.q}</h4><span class="sub">RUHS ${q.y} · ${q.m} marks ${q.note?'· ✅ solved answer':''}</span></div>`).join('')||
+    `<div class="card"><h4>Questions is subject mein add ho rahe hain</h4><span class="sub">Scanner se apna question paper scan karo — turant answers milenge</span></div>`;
+  }else if(t==='pyq'){
+    html=pyq.map(q=>`<div class="card ${q.note?'':'lockwrap'}" ${q.note?`onclick="go('note',{t:'${q.note.replace(/'/g,"\\'")}'})"`:''}>
+      <h4>📄 RUHS ${q.y} · ${q.q}</h4><span class="sub">${q.m} marks · ${q.note?'solved PDF + answers':'🔒 premium paper PDF'}</span>
+      ${q.note?'':`<div class="lockbadge"><b>💎 Premium</b><button class="btn gold small" onclick="go('vault')">Unlock</button></div>`}</div>`).join('')||`<div class="card"><span class="sub">No papers added yet.</span></div>`;
+  }else{
+    html=`<div class="flashcard" onclick="fcFlip()"><div id="fcface">${L(FLASHCARDS[0].f[0],FLASHCARDS[0].f[1])}</div></div>
+    <div style="text-align:center"><span class="sub">Card 1/${FLASHCARDS.length} · tap to flip · swipe = next</span></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn small ghost" style="flex:1" onclick="fcNext()">↻ Again</button>
+      <button class="btn small" style="flex:1" onclick="fcNext()">😊 Got it</button>
+    </div>`;
+    S.fcIdx=0;S.fcFlip=false;
+  }
+  el('subtab').innerHTML=`<div class="fade">${html}</div>`;
+}
+function fcFlip(){const c=FLASHCARDS[S.fcIdx];S.fcFlip=!S.fcFlip;
+  el('fcface').textContent=S.fcFlip?L(c.b[0],c.b[1]):L(c.f[0],c.f[1])}
+function fcNext(){S.fcIdx=(S.fcIdx+1)%FLASHCARDS.length;S.fcFlip=false;
+  const c=FLASHCARDS[S.fcIdx];el('fcface').textContent=L(c.f[0],c.f[1]);
+  document.querySelector('.flashcard+div span').textContent=`Card ${S.fcIdx+1}/${FLASHCARDS.length} · tap to flip · swipe = next`}
+
+/* ---------- NOTE ---------- */
+function renderNote(){
+  const n=noteByTitle(S.ctx.t);
+  if(!n)return `<h2>Not found</h2>`;
+  const pts=S.lang==='en'?n.en:(S.lang==='hinglish'?n.hi:n.hi);
+  const back=S.ctx.back||'home';
+  return `
+  <button class="back" onclick="go('${back}')">← Back</button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span class="pill">Sem ${n.sem} · ${n.sub}</span>
+    <span class="pill">Unit ${n.unit}</span>
+    <span class="pill gold">${n.marks} marks</span>
+    ${n.type==='drug'?'<span class="pill ok">💊 Drug</span>':''}
+  </div>
+  <h2>${S.ctx.t}</h2>
+  <div style="display:flex;gap:8px;margin:10px 0">
+    <button class="tbtn ${S.lang==='en'?'on':''}" onclick="S.lang='en';render()">English</button>
+    <button class="tbtn ${S.lang==='hinglish'?'on':''}" onclick="S.lang='hinglish';render()">Hinglish</button>
+    <button class="tbtn ${S.lang==='hi'?'on':''}" onclick="S.lang='hi';render()">हिंदी</button>
+    <span class="spacer"></span>
+    <button class="tbtn small" onclick="copied(this)">📋 Copy</button>
+    <button class="tbtn small" onclick="saved(this)">🔖 Save</button>
+  </div>
+  <div class="sectiontitle">${L('Point-wise notes — no paragraphs, exam-ready','Point-wise notes — koi paragraph nahi, exam-ready')}</div>
+  ${pts.map((p,i)=>`<div class="point"><span class="no">${i+1}</span><span>${p}</span></div>`).join('')}
+  ${n.flow?`
+  <div class="sectiontitle">⭐ ${L('Flowchart — step by step','Flowchart — kadam dar kadam')}</div>
+  ${n.flow.steps.map((st,i)=>`
+    ${i?`<div class="arrowdown">↓</div>`:''}
+    <div class="stepbox"><span class="sn">STEP ${i+1}</span><b>${L(st[0],st[1])}</b><span>${L(st[1],st[0])}</span></div>`).join('')}
+  <div class="card" style="cursor:default;margin-top:12px"><span class="sub">💡 ${L('Mnemonic:','Mnemonic:')} <b>${L('"Tetra = 4" — yaad rakho: 30S par 4 cheezein block hoti hain (initiation, tRNA binding, peptide bond, translocation)','"Tetra = 4" — 30S par 4 kaam block hote hain: initiation, tRNA binding, peptide bond, translocation')}</b></span></div>`:''}
+  <div class="sectiontitle">${L('Related','Related')}</div>
+  ${n.sub==='Pharmacology II'?`
+  <div class="card" onclick="go('note',{t:'Chloroquine — Mechanism of Action',back:'note'})"><h4>💊 Chloroquine — MOA</h4><span class="sub">5 marks · antimalarial</span></div>
+  <div class="card" onclick="go('note',{t:'Malaria — Plasmodium Life Cycle (Etiology)',back:'note'})"><h4>🦠 Malaria life cycle</h4><span class="sub">10 marks · etiology</span></div>`:''}
+  <div class="lockwrap" style="margin-top:12px">
+    <div class="card"><h4>🔒 ${L('Full unit pack — deep notes + solved answers','Poore unit ka pack — deep notes + solved answers')}</h4><span class="sub">${n.sub} · Unit ${n.unit} · diagrams + PYQ answers</span></div>
+    <div class="lockbadge"><b>💎 Premium</b><button class="btn gold small" onclick="go('vault')">Unlock unit</button></div>
+  </div>`;
+}
+function copied(b){b.textContent='✅ Copied';setTimeout(()=>b.textContent='📋 Copy',1200)}
+function saved(b){b.textContent='🔖 Saved';setTimeout(()=>b.textContent='🔖 Save',1200)}
+
+/* ---------- SEARCH ---------- */
+function renderSearch(){
+  return `
+  <h2>Search — all 8 semesters</h2>
+  <div class="searchwrap"><span class="sic">🔍</span>
+  <input type="text" id="q" placeholder="Drug, subject, question… (e.g. tetracycline)" oninput="doSearch(this.value)"></div>
+  <div style="margin-top:10px">
+    <span class="pill" onclick="sf('notes')">📘 Notes</span>
+    <span class="pill" onclick="sf('drugs')">💊 Drugs</span>
+    <span class="pill" onclick="sf('questions')">📝 Questions</span>
+    <span class="pill ghost" onclick="sf('')">✕ Clear</span>
+  </div>
+  <div id="sres"></div>`;
+}
+function sf(f){const q=el('q').value;S.filter=f;doSearch(q)}
+function doSearch(q){
+  q=(q||'').toLowerCase().trim();
+  const box=el('sres');
+  if(!q){box.innerHTML=`<div class="sectiontitle">Popular</div>
+    <div class="resulthit" onclick="go('note',{t:'Tetracycline — Mechanism of Action'})"><b>💊 Tetracycline — MOA</b><span>Pharmacology II · Sem 5 · 10 marks</span></div>
+    <div class="resulthit" onclick="go('note',{t:'Malaria — Plasmodium Life Cycle (Etiology)'})"><b>🦠 Malaria — Life cycle</b><span>Pharmacology II · Sem 5</span></div>
+    <div class="resulthit" onclick="go('note',{t:'Gene Transfer Techniques — Introduction'})"><b>🧫 Gene transfer techniques</b><span>Pharmaceutical Biotechnology · Sem 6</span></div>
+    <div class="resulthit" onclick="go('note',{t:'Ayurvedic Formulations — Asava & Arishta'})"><b>🌿 Asava & Arishta</b><span>Pharmacognosy II · Sem 5</span></div>`;return}
+  const hits=[];
+  Object.keys(NOTES).forEach(t=>{if(t.toLowerCase().includes(q))hits.push({t,kind:'note'})});
+  DRUGLIB.forEach(d=>{if(d.toLowerCase().includes(q))hits.push({t:d,kind:'drug'})});
+  Object.entries(PYQS).forEach(([sub,list])=>list.forEach(qq=>{if(qq.q.toLowerCase().includes(q))hits.push({t:qq.q,kind:'q',y:qq.y,m:qq.m,note:qq.note})}));
+  SEMS.forEach(s=>s.subs.forEach(x=>{if(x[0].toLowerCase().includes(q))hits.push({t:x[0],kind:'sub',sem:s.n})}));
+  box.innerHTML=hits.length?hits.map(h=>{
+    if(h.kind==='note')return `<div class="resulthit" onclick="go('note',{t:'${h.t.replace(/'/g,"\\'")}'})"><b>📘 ${h.t}</b><span>${NOTES[h.t].sub} · Sem ${NOTES[h.t].sem}</span></div>`;
+    if(h.kind==='drug')return `<div class="resulthit" onclick="go('note',{t:'${h.t} — Mechanism of Action'})"><b>💊 ${h.t}</b><span>Drug library · 50+ monographs</span></div>`;
+    if(h.kind==='q')return `<div class="resulthit" ${h.note?`onclick="go('note',{t:'${h.note.replace(/'/g,"\\'")}'})"`:''}><b>📝 ${h.t}</b><span>RUHS ${h.y} · ${h.m} marks${h.note?' · ✅ solved':''}</span></div>`;
+    return `<div class="resulthit" onclick="go('subject',{sem:${h.sem},name:'${h.t.replace(/'/g,"\\'")}'})"><b>📚 ${h.t}</b><span>Semester ${h.sem}</span></div>`;
+  }).join(''):`<div class="card"><h4>Kuch nahi mila 🤔</h4><span class="sub">Try: apna syllabus screenshot scan karo — jo image mein hoga, wahi milega.</span>
+    <button class="btn small block" onclick="go('scanner')">📷 Scan my syllabus</button></div>`;
+}
+
+/* ---------- SCANNER ---------- */
+function renderScanner(){
+  const items=SCAN_IMAGE.map(i=>`<label class="itemrow"><input type="checkbox" data-i="${i}" checked>
+    <span>${i}</span><span class="st pill">${DRUGLIB.includes(i)?'library ✓':'new'}</span></label>`).join('');
+  return `
+  <h2>📷 Smart Syllabus Scanner</h2>
+  <p class="sub">Upload apne exam ka syllabus / question paper / drug list screenshot. Notes sirf <b>image mein likhi cheezo</b> ke banenge — bilkul extra nahi.</p>
+  <div class="strict">⚖️ STRICT RULE ON: <b>"Jo di hui vo drug hee, not think your side."</b><br>
+  Sirf image mein maujood items par notes banenge. Koi extra example/drug nahi joda jayega.</div>
+  <div class="drop" onclick="pickFile()"><span class="ic">📁</span><b>Upload screenshot</b><span class="sub">JPG/PNG — syllabus, question paper ya drug list</span></div>
+  <input type="file" id="file" accept="image/*" style="display:none" onchange="filePicked(this)">
+  <div id="preview"></div>
+  <div style="text-align:center;margin:6px 0"><button class="btn ghost small" onclick="useSample()">Use sample drug-list image →</button></div>
+  <div id="scanStage"></div>`;
+}
+function pickFile(){el('file').click()}
+function filePicked(f){if(f.files[0]){const u=URL.createObjectURL(f.files[0]);
+  el('preview').innerHTML=`<div class="card" style="cursor:default"><b>✅ Image ready:</b> ${f.files[0].name}<br><img src="${u}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;border:1px solid var(--border)"></div>`;
+  startScan()}}
+function useSample(){
+  el('preview').innerHTML=`<div class="card" style="cursor:default"><b>✅ Sample image loaded (drug list)</b>
+  <div class="sampleimg" style="margin-top:8px;padding:12px 16px;background:#FDF8EC;font-family:Consolas,monospace;font-size:13px;line-height:1.8">
+    <b style="color:#7A5C10">DRUG LIST — Unit 5 (as printed)</b><br>1. Tetracycline<br>2. Sulfonamides<br>3. Chloramphenicol<br>4. Erythromycin<br>5. Griseofulvin</div></div>`;
+  startScan()}
+function startScan(){
+  if(S.scanStatus!=='idle')return;
+  S.scanStatus='running';S.scanSel={};SCAN_IMAGE.forEach(i=>S.scanSel[i]=true);
+  el('scanStage').innerHTML=`<div class="card"><h4>🔍 AI extracting items…</h4><span class="sub">Strict extraction prompt active — sirf image ke items allowed</span>
+  <div class="bar" style="margin-top:10px"><i style="width:100%;animation:none"></i></div></div>`;
+  setTimeout(()=>{
+    S.scanStatus='done';
+    const items=SCAN_IMAGE.map(i=>`<label class="itemrow"><input type="checkbox" data-i="${i}" ${S.scanSel[i]?'checked':''} onchange="togItem('${i}',this.checked)">
+    <span>${i}</span><span class="st pill ${DRUGLIB.includes(i)?'ok':'gold'}">${DRUGLIB.includes(i)?'library ✓':'new'}</span></label>`).join('');
+    el('scanStage').innerHTML=`
+      <div class="checkbadge">✅ Extracted from image: <b>5 items</b> — exactly jo image mein likhe hain. Zero extra.</div>
+      ${items}
+      <div class="strict">🔒 Validation rule: koi bhi item jo image mein nahi hai → generated notes mein allow NAHI hoga.</div>
+      <button class="btn block" onclick="genNotes()">⚡ Generate notes for selected items</button>
+      <div class="sub" style="text-align:center">Free: 3 scans/month · 💎 Premium: unlimited</div>`;
+  },900);
+}
+function togItem(i,v){S.scanSel[i]=v}
+function genNotes(){
+  const sel=SCAN_IMAGE.filter(i=>S.scanSel[i]);
+  if(!sel.length)return;
+  el('scanStage').innerHTML+=`<div class="card"><h4>⚙️ Generating ${sel.length} notes (point-wise + Hinglish)…</h4><span class="sub">Per-item prompt · max 12 points · no paragraphs</span></div>`;
+  setTimeout(()=>{
+    const lib=sel.filter(i=>DRUGLIB.slice(0,2).includes(i));
+    const gen=sel.filter(i=>!DRUGLIB.slice(0,2).includes(i));
+    el('scanStage').innerHTML=`
+      <div class="checkbadge">✔️ VALIDATION PASSED: ${sel.length}/${sel.length} notes match image items — <b>koi extra item nahi banaya.</b><br>
+      <span class="sub">validation_log: kept [${sel.join(', ')}] · rejected []</span></div>
+      ${sel.map(i=>{
+        const libHit=DRUGLIB.slice(0,2).includes(i);
+        const pts=libHit?(i==='Tetracycline'?noteByTitle('Tetracycline — Mechanism of Action').en:noteByTitle('Chloroquine — Mechanism of Action').en):SCAN_GEN[i];
+        const hpts=libHit?(i==='Tetracycline'?noteByTitle('Tetracycline — Mechanism of Action').hi:noteByTitle('Chloroquine — Mechanism of Action').hi):HINGLISH_GEN[i];
+        return `<div class="card" style="cursor:default"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <h4 style="flex:1">${i} — Notes</h4><span class="pill ${libHit?'ok':'gold'}">${libHit?'from library ✓':'AI generated'}</span></div>
+          <div style="margin-top:8px">${pts.slice(0,4).map((p,j)=>`<div class="point" style="margin:5px 0"><span class="no">${j+1}</span><span>${S.lang==='en'?p:hpts[j]}</span></div>`).join('')}</div>
+          <button class="tbtn small" onclick="openNote('${i}')">Open full note →</button></div>`;
+      }).join('')}
+      <div class="card" style="cursor:default;border-style:dashed"><b>💡 Repeat scan = ₹0:</b> ye notes library mein save ho gaye hain — agli baar "From library ✓" milega bina AI call ke.</div>`;
+  },1100);
+}
+function openNote(name){
+  if(name==='Tetracycline')go('note',{t:'Tetracycline — Mechanism of Action',back:'scanner'});
+  else if(name==='Chloroquine')go('note',{t:'Chloroquine — Mechanism of Action',back:'scanner'});
+}
+
+/* ---------- VAULT ---------- */
+function renderVault(){
+  const u=S.user;const prem=u.plan==='premium';
+  return `
+  <h2>💎 Premium Vault</h2>
+  <p class="sub">Unit-wise premium notes + RUHS previous years solved papers. Ek baar kharido, poore saal kholo.</p>
+  <div class="banner gold"><div style="font-size:24px">${prem?'✅':'💎'}</div>
+    <div><div class="bt">${prem?'Full Course active — valid till Mar 2027':'Full Course — ₹499 / saal'}</div>
+    <div class="bs">${prem?'Sab kuch unlocked: all 8 sems · PYQs · unlimited scanner':'All units · RUHS solved papers 2019–2024 · unlimited scanner · flashcards'}</div></div>
+    ${prem?'':'<button class="btn small" style="background:#fff;color:#8A6D1A" onclick="buyPlan()">Buy</button>'}</div>
+  ${prem?'':`
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+    <div class="card" style="text-align:center;padding:12px 6px" onclick="buyPlan()"><div style="font-size:22px">📦</div><h4>₹99</h4><span class="sub">One semester pack</span></div>
+    <div class="card" style="text-align:center;padding:12px 6px;border-color:var(--gold)" onclick="buyPlan()"><div style="font-size:22px">💎</div><h4>₹499</h4><span class="sub">Full course / yr</span></div>
+    <div class="card" style="text-align:center;padding:12px 6px" onclick="buyPlan()"><div style="font-size:22px">📄</div><h4>₹49</h4><span class="sub">PYQ pack</span></div>
+  </div>`}
+  <div class="sectiontitle">RUHS Previous Years — Solved</div>
+  ${['2024','2023','2022','2021','2020','2019'].map(y=>`
+  <div class="lockwrap"><div class="row"><span class="ic">📄</span>
+    <div class="grow"><b>RUHS ${y} — B.Pharm papers (Sem 1–8)</b><span>Solved answers + mark-wise breakdown</span></div>
+    <span class="pill gold">🔒</span></div>
+    ${prem?'':`<div class="lockbadge"><b>💎 Premium</b><button class="btn gold small" onclick="buyPlan()">Unlock</button></div>`}</div>`).join('')}
+  <div class="sectiontitle">Premium unit packs</div>
+  <div class="row"><span class="ic">💊</span><div class="grow"><b>Pharmacology II — Unit 5 deep pack</b><span>Tetracycline, Chloroquine, Sulfonamides… solved 10-mark answers</span></div>${prem?'<span class="pill ok">owned</span>':'<span class="pill gold">🔒</span>'}</div>
+  <div class="row"><span class="ic">🧫</span><div class="grow"><b>Biotechnology — Unit 4 (Gene transfer)</b><span>Unit-wise breakdown + diagrams</span></div>${prem?'<span class="pill ok">owned</span>':'<span class="pill gold">🔒</span>'}</div>
+  <div class="row"><span class="ic">🏥</span><div class="grow"><b>Pharmacy Practice + NDDS — full notes</b><span>Sem 7 clinical pack</span></div>${prem?'<span class="pill ok">owned</span>':'<span class="pill gold">🔒</span>'}</div>`;
+}
+function buyPlan(){
+  el('screen').insertAdjacentHTML('beforeend',`<div class="fade" style="position:fixed;inset:0;background:rgba(14,27,44,.45);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px" onclick="this.remove()">
+    <div class="card" style="max-width:340px;width:100%" onclick="event.stopPropagation()">
+      <h3>💎 Razorpay Checkout (demo)</h3>
+      <p class="sub">UPI / Card / NetBanking — test mode</p>
+      <div class="row"><span class="ic">💳</span><div class="grow"><b>Full Course</b><span>₹499 · 365 days · all 8 semesters</span></div></div>
+      <button class="btn block" onclick="pay()">Pay ₹499 (demo)</button>
+      <button class="btn ghost block" onclick="this.closest('div[style*=fixed]').remove()">Cancel</button>
+    </div></div>`);
+}
+function pay(){S.user.plan='premium';document.querySelector('div[style*=fixed]').remove();render();
+  setTimeout(()=>el('screen').insertAdjacentHTML('beforeend',`<div class="fade card" style="border-color:var(--ok);background:var(--oksoft)"><b>✅ Payment successful (demo)!</b><br><span class="sub">All premium content unlocked. Receipt emailed. 🎉</span></div>`),200)}
+
+/* ---------- PROFILE ---------- */
+function renderProfile(){
+  const u=S.user;
+  return `
+  <h2>👤 Profile &amp; Settings</h2>
+  <div class="card" style="cursor:default"><div style="display:flex;gap:12px;align-items:center">
+    <span style="font-size:34px">👩‍🎓</span>
+    <div class="grow"><h4>${u.name}</h4><span class="sub">B.Pharm · Sem ${u.sem} · RUHS pattern</span></div>
+    <span class="pill ${u.plan==='premium'?'gold':'ghost'}">${u.plan==='premium'?'💎 Premium':'Free'}</span></div></div>
+  <div class="sectiontitle">Study settings</div>
+  <div class="setrow"><div class="grow"><b>🌐 Default language</b><span>Notes ka default format</span></div>
+    <select style="width:auto" onchange="S.lang=this.value;render()">
+      <option value="en" ${S.lang==='en'?'selected':''}>English</option>
+      <option value="hinglish" ${S.lang==='hinglish'?'selected':''}>Hinglish</option>
+      <option value="hi" ${S.lang==='hi'?'selected':''}>हिंदी</option></select></div>
+  <div class="setrow"><div class="grow"><b>🌙 Night Study mode</b><span>Deep navy — late night eye strain kam</span></div>
+    <div class="switch ${S.night?'on':''}" onclick="toggleNight()"></div></div>
+  <div class="setrow"><div class="grow"><b>🎓 My semester</b><span>Dashboard highlight</span></div>
+    <select style="width:auto" onchange="S.user.sem=+this.value;render()">${SEMS.map(s=>`<option value="${s.n}" ${s.n===u.sem?'selected':''}>Sem ${s.n}</option>`).join('')}</select></div>
+  <div class="setrow"><div class="grow"><b>🔖 Bookmarks</b><span>${3} saved · Tetracycline MOA, Cell structure…</span></div><span class="pill">view</span></div>
+  <div class="setrow"><div class="grow"><b>📊 Progress</b><span>🔥 12-day streak · 4.5 hrs this week</span></div><span class="pill ok">62 done</span></div>
+  <div class="sectiontitle">About</div>
+  <p class="sub">PharmaPath v1.0 (prototype) · Content: PCI/RUHS pattern · Made for Hindi-medium B.Pharm students 💙<br>
+  Feedback: help@pharmapath.in · Privacy · Terms</p>`;
+}
+
+/* boot */
+go('home');
+</script>
+</body>
+</html>

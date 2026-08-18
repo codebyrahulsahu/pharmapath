@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaPath — B.Pharm Exam Prep App · Complete Design Specification</title>
+<style>
+  :root{
+    --bg:#F4F8FC; --card:#FFFFFF; --ink:#16324F; --muted:#5A7590;
+    --primary:#2E6FB7; --primary-soft:#E3EEF9; --accent:#4F9DDE;
+    --gold:#9A7B1E; --gold-soft:#FBF3DC; --success:#2E8B6D; --success-soft:#E4F4EE;
+    --danger:#B4442E; --danger-soft:#FBE9E4;
+    --border:#D9E5F0; --code-bg:#10233A; --code-ink:#D7E6F5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font:15px/1.6 'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;}
+  .wrap{max-width:1060px; margin:0 auto; padding:0 22px 80px;}
+  /* ---------- HERO ---------- */
+  .hero{background:linear-gradient(135deg,#1E4E82 0%,#2E6FB7 55%,#4F9DDE 100%); color:#fff; border-radius:0 0 26px 26px; padding:46px 22px 40px;}
+  .hero .wrap{max-width:1060px; padding:0 22px;}
+  .kicker{font-size:12.5px; letter-spacing:2.2px; text-transform:uppercase; color:#BFDCF5; font-weight:600;}
+  h1{font-family:Georgia,'Times New Roman',serif; font-size:34px; line-height:1.2; margin:10px 0 8px; font-weight:700;}
+  .hero p{color:#DCEAF8; max-width:780px; font-size:15.5px;}
+  .meta{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+  .chip{background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28); border-radius:999px; padding:5px 14px; font-size:12.5px; color:#EAF3FC;}
+  /* ---------- NAV ---------- */
+  .toc{position:sticky; top:0; z-index:50; background:rgba(255,255,255,.96); border-bottom:1px solid var(--border); backdrop-filter:blur(6px);}
+  .toc .wrap{display:flex; gap:4px; overflow-x:auto; padding:10px 22px; white-space:nowrap; max-width:1060px;}
+  .toc a{color:var(--muted); text-decoration:none; font-size:12.8px; padding:5px 11px; border-radius:999px; font-weight:600;}
+  .toc a:hover{background:var(--primary-soft); color:var(--primary);}
+  /* ---------- SECTIONS ---------- */
+  section{padding:44px 0 8px;}
+  .sec-no{display:inline-block; background:var(--primary); color:#fff; font-size:12px; font-weight:700; border-radius:6px; padding:3px 10px; letter-spacing:1px; margin-bottom:10px;}
+  h2{font-family:Georgia,serif; font-size:26px; margin-bottom:6px; color:var(--ink);}
+  h3{font-size:17.5px; margin:26px 0 10px; color:var(--primary);}
+  h4{font-size:15px; margin:18px 0 8px; color:var(--ink);}
+  .lead{color:var(--muted); font-size:15px; max-width:860px; margin-bottom:14px;}
+  p{margin-bottom:10px;}
+  ul,ol{margin:0 0 12px 22px;}
+  li{margin-bottom:5px;}
+  b,strong{color:var(--ink);}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin:16px 0; box-shadow:0 1px 3px rgba(22,50,79,.05);}
+  .callout{border-left:4px solid var(--primary); background:var(--primary-soft); border-radius:0 10px 10px 0; padding:13px 16px; margin:14px 0; font-size:14.3px;}
+  .callout.gold{border-left-color:var(--gold); background:var(--gold-soft);}
+  .callout.green{border-left-color:var(--success); background:var(--success-soft);}
+  .callout.red{border-left-color:var(--danger); background:var(--danger-soft);}
+  .callout b{color:inherit;}
+  /* ---------- TABLES ---------- */
+  table{width:100%; border-collapse:collapse; margin:14px 0 18px; background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; font-size:13.8px;}
+  th{background:var(--primary-soft); color:var(--primary); text-align:left; padding:9px 12px; font-size:12.6px; text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid var(--border);}
+  td{padding:8px 12px; border-bottom:1px solid #EDF3F9; vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tr:nth-child(even) td{background:#FAFCFE;}
+  td .mono{font-family:Consolas,Menlo,monospace; font-size:12.5px; color:var(--primary);}
+  /* ---------- CODE ---------- */
+  pre{background:var(--code-bg); color:var(--code-ink); padding:16px 18px; border-radius:12px; overflow-x:auto; font:13px/1.65 Consolas,Menlo,monospace; margin:14px 0; white-space:pre-wrap;}
+  pre .cm{color:#7FA8CF;}
+  pre .k{color:#8FC7FF;}
+  /* ---------- WIREFRAMES ---------- */
+  .wf{background:#F7FAFD; border:1.5px dashed #9DBDDD; border-radius:12px; padding:12px; margin:12px 0; display:flex; flex-direction:column; gap:7px; font-size:11px;}
+  .wf .r{display:flex; gap:7px;}
+  .wf .b{flex:1; border:1px solid #C6DCF0; background:#fff; border-radius:7px; padding:7px 8px; text-align:center; color:#3E6285; min-width:0;}
+  .wf .b.acc{background:var(--primary-soft); border-color:var(--primary); color:var(--primary); font-weight:700;}
+  .wf .b.gold{background:var(--gold-soft); border-color:var(--gold); color:var(--gold); font-weight:700;}
+  .wf .b.ghost{border-style:dashed; color:#8AA7C4; background:transparent;}
+  .wf .b .sub{display:block; font-size:9.5px; color:#7E9CBB; font-weight:400;}
+  .wf .b.acc .sub{color:#5F8FC0;}
+  .wf .title{font-weight:800; color:var(--primary); letter-spacing:.8px; text-transform:uppercase; font-size:10.5px;}
+  .wf .rowlabel{flex:0 0 auto; width:64px; color:#8AA7C4; font-size:9.5px; display:flex; align-items:center; text-transform:uppercase; letter-spacing:.5px;}
+  /* ---------- SCREEN CARDS ---------- */
+  .screen{background:var(--card); border:1px solid var(--border); border-radius:14px; margin:22px 0; overflow:hidden; box-shadow:0 1px 3px rgba(22,50,79,.05);}
+  .screen>header{background:linear-gradient(90deg,#F0F6FC,#EAF3FA); border-bottom:1px solid var(--border); padding:13px 20px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+  .screen>header .sname{font-weight:800; font-size:15.5px; color:var(--ink);}
+  .screen>header .sno{font-size:11px; color:var(--primary); background:#fff; border:1px solid var(--border); border-radius:999px; padding:3px 10px; font-weight:700; letter-spacing:.5px;}
+  .screen .body{padding:18px 20px;}
+  .screen .body h4{margin-top:0;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;}}
+  /* ---------- SCHEMA CARDS ---------- */
+  .tbl{background:#fff; border:1px solid var(--border); border-radius:12px; margin:14px 0; overflow:hidden;}
+  .tbl>header{background:var(--code-bg); color:#fff; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;}
+  .tbl>header .tname{font-family:Consolas,Menlo,monospace; font-size:14.5px; font-weight:700;}
+  .tbl>header .tpurpose{font-size:12px; color:#9FBFDD;}
+  .tbl .rows{padding:6px 16px 10px;}
+  .fld{display:flex; gap:10px; padding:6px 0; border-bottom:1px dashed #E8F0F8; font-size:13.2px; align-items:baseline;}
+  .fld:last-child{border-bottom:none;}
+  .fld .fname{font-family:Consolas,Menlo,monospace; font-weight:700; color:var(--primary); min-width:150px;}
+  .fld .ftype{font-family:Consolas,Menlo,monospace; color:#7E9CBB; min-width:96px; font-size:11.8px;}
+  .fld .fdesc{color:#4A6B8C;}
+  .badge{display:inline-block; font-size:10px; font-weight:800; border-radius:5px; padding:1.5px 6px; letter-spacing:.5px; margin-left:6px; vertical-align:1px;}
+  .badge.pk{background:#FDE9E9; color:#B03A2E; border:1px solid #F3C6C2;}
+  .badge.fk{background:#E8F1FB; color:#2E6FB7; border:1px solid #C3DAF0;}
+  .badge.uq{background:#E4F4EE; color:#2E8B6D; border:1px solid #BFE3D6;}
+  .badge.opt{background:#F1F3F7; color:#7A8CA0; border:1px solid #DDE3EC;}
+  .badge.ai{background:#FBF3DC; color:#9A7B1E; border:1px solid #EADCAE;}
+  /* ---------- MISC ---------- */
+  .flow{display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:14px 0;}
+  .flow .step{background:var(--primary-soft); border:1px solid var(--primary); color:var(--primary); border-radius:9px; padding:7px 13px; font-size:12.8px; font-weight:700;}
+  .flow .arr{color:#9DBDDD; font-size:17px; font-weight:700;}
+  .pill{display:inline-block; background:var(--primary-soft); color:var(--primary); border-radius:999px; padding:2px 10px; font-size:12px; font-weight:600; margin:2px 3px 2px 0;}
+  .pill.gold{background:var(--gold-soft); color:var(--gold);}
+  .pill.green{background:var(--success-soft); color:var(--success);}
+  .foot{margin-top:60px; padding:26px; background:var(--code-bg); color:#9FBFDD; border-radius:16px; font-size:13px; text-align:center;}
+  .foot b{color:#fff;}
+  .check{list-style:none; margin-left:0;}
+  .check li{padding-left:28px; position:relative; margin-bottom:7px;}
+  .check li:before{content:"✔"; position:absolute; left:2px; color:var(--success); font-weight:800;}
+  a{color:var(--primary);}
+  .small{font-size:12.5px; color:var(--muted);}
+  .pagebreak{border:none; border-top:2px solid var(--border); margin:50px 0;}
+</style>
+</head>
+<body>
+
+<!-- ================= HERO ================= -->
+<div class="hero">
+  <div class="kicker">No-Code Product Design Specification · Confidential Draft</div>
+  <h1>PharmaPath — B.Pharm Exam Companion</h1>
+  <p>A complete 8-semester (Sem 1 → Sem 8) exam-prep app for B.Pharmacy students of Rajasthan University of Health Sciences (RUHS), built for Hindi-medium students who need complex pharmacy concepts in simple, point-wise, bilingual (English + Hinglish) format.</p>
+  <div class="meta">
+    <span class="chip">📘 RUHS / PCI pattern aligned</span>
+    <span class="chip">🗂 16 screens · 17 database tables</span>
+    <span class="chip">🤖 AI Syllabus Scanner</span>
+    <span class="chip">🌐 EN ↔ Hinglish toggle</span>
+    <span class="chip">💎 Premium vault</span>
+  </div>
+</div>
+
+<!-- ================= TOC ================= -->
+<nav class="toc"><div class="wrap">
+  <a href="#s1">1 · Vision</a>
+  <a href="#s2">2 · Architecture</a>
+  <a href="#s3">3 · Navigation Map</a>
+  <a href="#s4">4 · Screen-by-Screen</a>
+  <a href="#s5">5 · Bilingual System</a>
+  <a href="#s6">6 · Smart Scanner</a>
+  <a href="#s7">7 · Database Schema</a>
+  <a href="#s8">8 · No-Code Build Plan</a>
+  <a href="#s9">9 · RUHS Alignment</a>
+  <a href="#s10">10 · Content Rules</a>
+  <a href="#s11">11 · Premium &amp; Monetization</a>
+  <a href="#s12">12 · Roadmap &amp; Launch</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ================= 1. VISION ================= -->
+<section id="s1">
+  <span class="sec-no">SECTION 1</span>
+  <h2>Product Vision &amp; Requirement Map</h2>
+  <p class="lead">Every requirement you listed maps to a concrete design decision. This is the contract the whole spec follows.</p>
+  <table>
+    <tr><th style="width:26%">Your requirement</th><th>Design decision in this spec</th></tr>
+    <tr><td><b>Complete B.Pharm dashboard (Sem 1–8)</b></td><td>Home screen shows 8 semester cards in sequential order; each opens its subject list (full PCI/RUHS subject set). See Screen S3–S6.</td></tr>
+    <tr><td><b>Subject modules: Foundation / Core Medical / Advanced-Clinical</b></td><td>Every subject carries a <span class="mono">category</span> field (<span class="mono">foundation | core_medical | advanced_clinical</span>) → used for filters, color coding, and the "Track" chips on the dashboard.</td></tr>
+    <tr><td><b>No paragraphs — point-wise only</b></td><td>Content is stored as <b>JSON arrays of bullet points</b> (<span class="mono">en_points[]</span>, <span class="mono">hinglish_points[]</span>), never as free text. The database schema itself enforces the rule (§7, §10).</td></tr>
+    <tr><td><b>Flowcharts &amp; step-by-step mechanisms</b></td><td>Every note can carry a <span class="mono">flowchart_json</span> (ordered steps + arrows) rendered as a vertical stepper + simple SVG diagram (Screen S9).</td></tr>
+    <tr><td><b>Bilingual toggle (English → Hindi/Hinglish)</b></td><td>Global toggle stored in the user profile (<span class="mono">users.language_pref</span>); all notes ship with parallel Hinglish points; AI fallback translation for new content (§5).</td></tr>
+    <tr><td><b>Smart Syllabus/Screenshot Scanner</b></td><td>Upload image → OCR + AI extraction → <b>strict whitelist rule</b> ("Jo di hui vo drug hee, not think your side") → notes generated <i>only</i> for items present in the image, with a post-generation validation step (§6).</td></tr>
+    <tr><td><b>Premium / purchased notes section</b></td><td>Separate Premium Vault (Screen S13) with Razorpay/Stripe checkout; <span class="mono">is_premium</span> flags + <span class="mono">purchases</span> table control unlocking (§11).</td></tr>
+    <tr><td><b>Calming UI (soft blues &amp; whites, late-night friendly)</b></td><td>Design-token palette (§4.0) + built-in "Night Study" dark mode (deep navy, low contrast glare).</td></tr>
+    <tr><td><b>Robust search &amp; filter across all 8 semesters</b></td><td>Global search screen (S4) with filters: Semester, Category, Content type, Unit, Marks; search hits notes, subjects, drugs, and PYQs.</td></tr>
+  </table>
+  <div class="callout green"><b>Working name:</b> "PharmaPath" (placeholder). Suggested tagline: <i>"Sem 1 se Sem 8 tak — pura B.Pharm, simple bhasha mein."</i> Target: RUHS (and other PCI-pattern universities: RTU-affiliated colleges, etc.)</div>
+</section>
+
+<!-- ================= 2. ARCHITECTURE ================= -->
+<section id="s2">
+  <span class="sec-no">SECTION 2</span>
+  <h2>App Architecture (No-Code Stack)</h2>
+  <p class="lead">The app has 4 layers. Everything is achievable on no-code platforms; the only custom-ish piece is the AI Scanner, which is a standard API call to OpenAI Vision (GPT-4o-mini) — no code required.</p>
+
+  <div class="wf">
+    <div class="title">Layer 1 · Frontend (UI) — No-code platform</div>
+    <div class="r">
+      <div class="b acc">Glide app / Bubble app / FlutterFlow app<span class="sub">Dashboard · Semesters · Notes · Scanner · Vault</span></div>
+    </div>
+    <div class="r"><div class="rowlabel">connects to</div><div class="b" style="border-style:dashed"></div></div>
+    <div class="title">Layer 2 · Data — Database / Sheets</div>
+    <div class="r">
+      <div class="b acc">Google Sheets (V1, Glide) <span class="sub">or</span> Airtable <span class="sub">or</span> Supabase/PostgreSQL (V2, FlutterFlow)</div>
+      <div class="b">17 tables: semesters, subjects, units, notes, drugs, questions, scanner_sessions… <span class="sub">full list in §7</span></div>
+    </div>
+    <div class="r"><div class="rowlabel">via</div><div class="b" style="border-style:dashed">HTTP / Webhooks (Make.com, Zapier, Glide AI Actions, Bubble API Connector)</div></div>
+    <div class="title">Layer 3 · AI Services (the "brain")</div>
+    <div class="r">
+      <div class="b acc">OpenAI Vision (GPT-4o-mini) <span class="sub">screenshot OCR + strict item extraction</span></div>
+      <div class="b">LLM (GPT-4o-mini / Claude) <span class="sub">point-wise note generation + Hinglish translation</span></div>
+      <div class="b">Image store <span class="sub">Glide file storage / Supabase Storage / S3</span></div>
+    </div>
+    <div class="r"><div class="rowlabel">plus</div><div class="b" style="border-style:dashed">Layer 4 · Services: Auth (phone OTP / email), Payments (Razorpay India / Stripe), Push notifications, Analytics (Mixpanel/GA4)</div></div>
+  </div>
+
+  <h3>Why this split works on no-code</h3>
+  <ul>
+    <li><b>Auth:</b> Glide Sign-In, Bubble native auth, or Supabase Auth — all no-code.</li>
+    <li><b>Payments:</b> Razorpay is the correct choice for India (UPI, cards, netbanking). Glide → Stripe/Razorpay via integration; Bubble → Razorpay plugin; FlutterFlow → Razorpay SDK.</li>
+    <li><b>AI calls:</b> Glide AI Actions (one-click) or Make.com webhook → OpenAI. Bubble: API Connector + a single "Call OpenAI" workflow. FlutterFlow: AI Actions.</li>
+    <li><b>Content storage:</b> point-wise content lives in one column as JSON — every platform handles JSON fields.</li>
+  </ul>
+
+  <h3>Platform recommendation summary (full matrix in §8)</h3>
+  <table>
+    <tr><th>Path</th><th>Platform</th><th>Best for</th><th>Ship time</th><th>Store release</th></tr>
+    <tr><td><b>Fast track (recommended V1)</b></td><td>Glide + Google Sheets + Make.com + OpenAI</td><td>MVP in 4–6 weeks, cheapest, AI Actions built-in</td><td>4–6 weeks</td><td>PWA + iOS/Android via Glide</td></tr>
+    <tr><td><b>Full track (V2)</b></td><td>FlutterFlow + Supabase + OpenAI</td><td>Native feel, offline, custom scanner UI, best long-term</td><td>8–12 weeks</td><td>Play Store + App Store</td></tr>
+    <tr><td><b>Custom track</b></td><td>Bubble + Airtable + API Connector</td><td>Most flexible AI workflows, complex logic</td><td>8–10 weeks</td><td>Web-first + wrappers</td></tr>
+  </table>
+</section>
+
+<!-- ================= 3. IA ================= -->
+<section id="s3">
+  <span class="sec-no">SECTION 3</span>
+  <h2>Information Architecture — Navigation Map</h2>
+  <p class="lead">One key decision: the app is <b>Semester-first</b> (the student studies one semester at a time) with a <b>global search overlay</b> for cross-semester discovery. The flow is 4 levels deep maximum, so nothing is ever more than 3 taps away.</p>
+
+  <div class="card">
+    <pre><span class="k">S1</span> Splash / Onboarding (choose language: English · Hindi · Hinglish)
+ └─ <span class="k">S2</span> Login (phone OTP / email magic link) ──► [free account created]
+     └─ <span class="k">S3</span> HOME DASHBOARD  ◄── bottom nav: [Home] [Search] [Scanner] [Vault] [Profile]
+         ├─ Semester 1..8 cards (grid) ──► <span class="k">S5</span> Semester detail
+         ├─ Global search bar ──► <span class="k">S4</span> Search &amp; Filter
+         ├─ "Scan my syllabus" CTA ──► <span class="k">S10</span> Smart Scanner
+         ├─ Premium banner ──► <span class="k">S12</span> Premium store
+         └─ Continue studying (last subject) ──► <span class="k">S6</span>
+     ├─ <span class="k">S5</span> Semester detail (Sem 1..8)
+     │    └─ subject card ──► <span class="k">S6</span> Subject home
+     ├─ <span class="k">S6</span> Subject home (tabs: Units · Important Qs · PYQs · Flashcards)
+     │    ├─ unit card ──► <span class="k">S7</span> Unit &amp; note list
+     │    └─ note row ──► <span class="k">S8</span> Note viewer (bilingual toggle)
+     │         └─ "Flowchart" button ──► <span class="k">S9</span> Flowchart viewer
+     ├─ <span class="k">S4</span> Search &amp; Filter (all 8 semesters; filter chips)
+     ├─ <span class="k">S10</span> Smart Scanner (upload screenshot)
+     │    └─ <span class="k">S11</span> Scanner result (extracted items ONLY → generate notes)
+     ├─ <span class="k">S12</span> Premium store (plans) ──► Razorpay checkout ──► <span class="k">S13</span> Premium Vault
+     ├─ <span class="k">S14</span> Bookmarks &amp; Progress (stats, streaks, saved notes)
+     ├─ <span class="k">S15</span> Flashcards (revision mode, per unit)
+     └─ <span class="k">S16</span> Profile &amp; Settings (language, night mode, font size, plan, logout)</pre>
+  </div>
+
+  <div class="callout"><b>Navigation rule:</b> bottom nav has 5 items — <b>Home · Search · Scanner (center, prominent) · Vault · Profile</b>. The Scanner gets center placement because it is the app's "hero" differentiator. Top bar always shows: screen title + language toggle (EN/Hinglish) + night-mode toggle.</div>
+</section>
+<!-- ================= 4. SCREENS ================= -->
+<section id="s4">
+  <span class="sec-no">SECTION 4</span>
+  <h2>Screen-by-Screen Layouts (16 Screens)</h2>
+  <p class="lead">Wireframes below use boxes = UI regions. Every screen lists: purpose, layout, data fields it reads/writes, and edge cases. All screens share the design tokens in §4.0.</p>
+
+  <h3 id="s40">4.0 Design Tokens (the calming academic palette)</h3>
+  <table>
+    <tr><th>Token</th><th>Hex</th><th>Use</th></tr>
+    <tr><td><b>Canvas</b></td><td class="mono">#F4F8FC</td><td>App background — soft blue-white, zero eye strain</td></tr>
+    <tr><td><b>Surface</b></td><td class="mono">#FFFFFF</td><td>Cards, sheets, note surfaces</td></tr>
+    <tr><td><b>Primary</b></td><td class="mono">#2E6FB7</td><td>Buttons, active states, headings accents</td></tr>
+    <tr><td><b>Primary soft</b></td><td class="mono">#E3EEF9</td><td>Selected chips, highlights, table headers</td></tr>
+    <tr><td><b>Accent</b></td><td class="mono">#4F9DDE</td><td>Progress rings, links, scanner highlights</td></tr>
+    <tr><td><b>Ink</b></td><td class="mono">#16324F</td><td>Headings &amp; body text (deep navy)</td></tr>
+    <tr><td><b>Muted</b></td><td class="mono">#5A7590</td><td>Secondary text, metadata</td></tr>
+    <tr><td><b>Premium</b></td><td class="mono">#9A7B1E</td><td>Gold — only for premium/locked elements</td></tr>
+    <tr><td><b>Success / Danger</b></td><td class="mono">#2E8B6D / #B4442E</td><td>Progress, correct answers / errors, "skip"</td></tr>
+    <tr><td><b>Night mode</b></td><td class="mono">#0E1B2C bg · #16283F card · #D7E6F5 text</td><td>"Night Study" dark theme (late-night reading)</td></tr>
+  </table>
+  <div class="callout"><b>Typography:</b> Headings — Georgia (academic serif, bold). Body — Segoe UI / system sans, 15px, line-height 1.6. Notes — 15.5px with relaxed 1.7 line-height. Minimum touch target 44×44px. Bold headings + generous white space per your UI guidelines.</div>
+
+  <!-- ---------- S1 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S1 · Splash &amp; Onboarding (Language Choice)</span><span class="sno">SCREEN 01</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>First impression + capture the single most important preference: <b>language medium</b>. Hindi-medium students must land in a comfortable mode in 2 taps.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">App logo + name (PharmaPath) <span class="sub">"Sem 1 se Sem 8 tak"</span></div></div>
+        <div class="r"><div class="b">Tagline — 1 line</div></div>
+        <div class="r"><div class="b ghost">"Aap kis bhasha mein padhna chahte hain?" (language prompt)</div></div>
+        <div class="r">
+          <div class="b acc">🇬🇧 English</div>
+          <div class="b acc">🇮🇳 Hinglish</div>
+          <div class="b acc">हिंदी (Hindi)</div>
+        </div>
+        <div class="r"><div class="b gold">💎 Premium preview strip <span class="sub">"Full notes + solved papers — check later" (skip)</span></div></div>
+        <div class="r"><div class="b ghost">Continue → (goes to Login)</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Writes: <span class="mono">users.language_pref</span> (en | hinglish | hi) — set before account creation, stored on signup.</li>
+        <li>Skip logic: tapping a language card immediately proceeds; choice is editable later in Profile (S16).</li>
+        <li>Edge cases: offline — language choice stored locally and synced later; returning user (token present) → skip to S3.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S2 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S2 · Login / Signup</span><span class="sno">SCREEN 02</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Phone-OTP-first (India reality) with email option. One account syncs bookmarks, progress, premium purchases across devices.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">Mobile number (+91) — OTP login (primary)</div><div class="b ghost">Email magic link (secondary)</div></div>
+        <div class="r"><div class="b ghost">OTP input — 6 boxes · "Resend in 30s"</div></div>
+        <div class="r"><div class="b ghost">[Continue] → auto-creates user row if new</div></div>
+        <div class="r"><div class="b">"Guest mode — I'll login later" (read-only browsing)</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads/writes: <span class="mono">users</span> (phone, email, name optional, language_pref from S1).</li>
+        <li>Guest mode: limited to 1 free note per subject; every "unlock" action prompts login — classic conversion funnel.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S3 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S3 · Home Dashboard — "Complete B.Pharm"</span><span class="sno">SCREEN 03 · HOME</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>The heart of the app: <b>Semester 1 → 8 in sequence</b>, current-semester highlighted, one-tap continue, scanner CTA, premium banner.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">Top bar: Greeting "Namaste, Riya 👋" · 🌐 EN|Hinglish toggle · 🌙 night mode</div></div>
+        <div class="r"><div class="b acc">🔍 Search bar — "Find subject, drug, question…" (opens S4)</div></div>
+        <div class="r"><div class="b gold">📷 SCAN MY SYLLABUS / QUESTION PAPER → (opens S10)</div></div>
+        <div class="r">
+          <div class="b ghost rowlabel">Tracks:</div>
+          <div class="b">🧪 Foundation <span class="sub">Sem 1–3</span></div>
+          <div class="b">💊 Core Medical <span class="sub">Sem 4–6</span></div>
+          <div class="b">🏥 Advanced &amp; Clinical <span class="sub">Sem 7–8</span></div>
+        </div>
+        <div class="r">
+          <div class="b acc">SEM 1 <span class="sub">6 subjects · 45% done</span></div>
+          <div class="b acc">SEM 2 <span class="sub">6 subjects</span></div>
+          <div class="b acc">SEM 3 <span class="sub">4 subjects</span></div>
+          <div class="b acc">SEM 4 <span class="sub">5 subjects</span></div>
+        </div>
+        <div class="r">
+          <div class="b acc">SEM 5 <span class="sub">5 subjects</span></div>
+          <div class="b acc">SEM 6 <span class="sub">6 subjects</span></div>
+          <div class="b acc">SEM 7 <span class="sub">4 subjects</span></div>
+          <div class="b acc">SEM 8 <span class="sub">2 core + 10 electives</span></div>
+        </div>
+        <div class="r"><div class="b ghost">Continue studying: Pharmacology II · Unit 3 · Tetracycline MOA (resume chip)</div></div>
+        <div class="r"><div class="b gold">💎 Premium banner: "Unlock all units + RUHS solved papers"</div></div>
+        <div class="r">
+          <div class="b">🏠 Home</div><div class="b">🔍 Search</div><div class="b acc">📷 Scanner</div><div class="b">💎 Vault</div><div class="b">👤 Profile</div>
+        </div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads: <span class="mono">semesters</span> (ordered 1–8), <span class="mono">subjects</span> (count per sem), <span class="mono">progress</span> (per-subject %), <span class="mono">users.semester</span> (to highlight current).</li>
+        <li>Semester card shows: sem number, subject count, progress ring, category color strip.</li>
+        <li>Edge cases: student changes semester (profile edit) → highlight moves, progress preserved; empty semesters (new scheme) → "Coming soon" ghost card.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S4 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S4 · Global Search &amp; Filter (all 8 semesters)</span><span class="sno">SCREEN 04</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Fast cross-semester lookup: type a drug, subject, or question — get results grouped by type with filters.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">Search input (live, debounced 300 ms)</div></div>
+        <div class="r">
+          <div class="b acc">Filter: Semester ▾</div>
+          <div class="b acc">Filter: Type ▾ <span class="sub">Notes · Drugs · Qs · PYQ · Flashcards</span></div>
+          <div class="b acc">Filter: Category ▾</div>
+          <div class="b acc">Filter: Marks ▾ <span class="sub">2 · 5 · 8 · 10</span></div>
+        </div>
+        <div class="r">
+          <div class="b">📄 Notes <span class="sub">"Tetracycline — MOA" · Pharmacology II · Sem 4</span></div>
+        </div>
+        <div class="r">
+          <div class="b">💊 Drug <span class="sub">Tetracycline · Class: Antibiotic (tetracyclines)</span></div>
+          <div class="b">📝 Question <span class="sub">RUHS 2023 · MOA of tetracycline · 10 marks</span></div>
+        </div>
+        <div class="r"><div class="b ghost">Recent searches: "chloroquine" · "aseptic technique" · "HPLC"</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Search indexes: <span class="mono">notes.title + tags</span>, <span class="mono">drugs.name + class</span>, <span class="mono">questions.question_text</span>, <span class="mono">subjects.name</span>.</li>
+        <li>Grouped results with semester + subject chips; tapping a result goes to its native screen (S6/S8/S9).</li>
+        <li>Edge cases: no results → "Not found? Scan your syllabus" (routes to scanner); Hinglish query support (e.g., "tetrasaiklin" via transliteration mapping in glossary table).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S5 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S5 · Semester Detail (e.g., Semester 4)</span><span class="sno">SCREEN 05</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>All subjects of one semester with per-subject progress; category chips; links to PYQ papers of that semester.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">Header: "Semester 4 · Core Medical" + progress ring + back</div></div>
+        <div class="r">
+          <div class="b acc">📘 Pharmaceutical Organic Chemistry III</div>
+          <div class="b acc">🧪 Medicinal Chemistry I</div>
+        </div>
+        <div class="r">
+          <div class="b acc">⚗️ Physical Pharmaceutics II</div>
+          <div class="b acc">💊 Pharmacology I</div>
+        </div>
+        <div class="r">
+          <div class="b acc">🌿 Pharmacognosy &amp; Phytochemistry I</div>
+          <div class="b gold">📄 RUHS Previous Papers — Sem 4 (2020–2024)</div>
+        </div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads: <span class="mono">subjects WHERE sem_id=4</span> ordered by syllabus order; subject card = name + code (BP404T etc.) + units progress + premium lock badge if any unit locked.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S6 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S6 · Subject Home (e.g., Pharmacology II)</span><span class="sno">SCREEN 06</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>One subject, four tabs: <b>Units · Important Questions · PYQs · Flashcards</b>. The tabs mirror how students revise.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">Header: Pharmacology II · BP502T · Sem 5 · progress 45%</div></div>
+        <div class="r">
+          <div class="b acc">📚 Units</div>
+          <div class="b acc">❓ Important Qs</div>
+          <div class="b acc">📄 PYQs</div>
+          <div class="b acc">🃏 Flashcards</div>
+        </div>
+        <div class="r"><div class="b">Unit 1 · General Pharmacology <span class="sub">8 notes · 60%</span></div></div>
+        <div class="r"><div class="b">Unit 2 · Drugs Acting on ANS <span class="sub">12 notes</span></div></div>
+        <div class="r"><div class="b">Unit 3 · Drugs for PNS &amp; CNS</div></div>
+        <div class="r"><div class="b gold">🔒 Unit 4 · Autacoids &amp; Chemotherapy (premium)</div></div>
+        <div class="r"><div class="b">Unit 5 · Chemotherapy incl. Antibiotics <span class="sub">→ Tetracycline MOA inside</span></div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads: <span class="mono">units</span>, <span class="mono">notes</span> per unit, <span class="mono">questions</span> (important Qs tab: is_important=true), <span class="mono">question_papers</span> (PYQs tab), <span class="mono">flashcards</span>.</li>
+        <li>Lock logic: unit rows with any premium note render gold lock + "🔒 Unlock unit" → S12.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S7 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S7 · Unit &amp; Note List</span><span class="sno">SCREEN 07</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>All notes of one unit, grouped by type (Topic notes · Drug monographs · Mechanism flowcharts · Definitions).</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">Unit 5 · Chemotherapy — note list (count · progress)</div></div>
+        <div class="r">
+          <div class="b">📌 Antibiotics — Classification (2-min read)</div>
+          <div class="b">🧬 Tetracycline — Mechanism of Action <span class="sub">⭐ flowchart</span></div>
+        </div>
+        <div class="r">
+          <div class="b">🦠 Chloroquine &amp; Malaria — Life cycle (etiology)</div>
+          <div class="b">💊 Sulfonamides — MOA + uses</div>
+        </div>
+        <div class="r">
+          <div class="b gold">🔒 Unit 5 premium pack — Solved 10-mark answers (RUHS pattern)</div>
+        </div>
+        <div class="r"><div class="b ghost">Sort: by unit order ▾ · Filter: All ▾ (Notes/Drugs/Qs)</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads: <span class="mono">notes WHERE unit_id=…</span>; chips show type, marks value (if answer), "⭐ flowchart available".</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S8 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S8 · Note / Answer Viewer (the core reading screen)</span><span class="sno">SCREEN 08</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Where the study happens: <b>point-wise content</b>, bilingual toggle, embedded flowchart, copy/save. No paragraphs anywhere.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">Title: "Tetracycline — Mechanism of Action" · [10 marks] · Sem 5 · Pharma II</div></div>
+        <div class="r">
+          <div class="b acc">🌐 Language: English | <b>Hinglish</b> | हिंदी (segmented toggle)</div>
+          <div class="b ghost">🔖 Bookmark · 📋 Copy · ↗ Share · Aa font-size</div>
+        </div>
+        <div class="r"><div class="b">✔ Point 1 — enters bacterial cell by passive diffusion through porin channels</div></div>
+        <div class="r"><div class="b">✔ Point 2 — binds reversibly to 30S ribosomal subunit</div></div>
+        <div class="r"><div class="b">✔ Point 3 — blocks binding of aminoacyl-tRNA to A-site… (5–12 points max)</div></div>
+        <div class="r"><div class="b acc">▶ View step-by-step flowchart (opens S9)</div></div>
+        <div class="r">
+          <div class="b ghost">Related: Chloroquine MOA · "Explain tetracycline MOA" RUHS 2023 Q · Flashcards (5)</div>
+        </div>
+        <div class="r"><div class="b gold">🔒 Next note in unit is premium — Unlock unit</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads: <span class="mono">notes.en_points / hinglish_points / hindi_points</span> (JSON arrays), <span class="mono">flowchart_json</span>, related ids.</li>
+        <li>Toggle behavior: instant client-side switch — no API call (both languages pre-stored). For AI-generated scanner content, the Hinglish is generated at creation time and cached in <span class="mono">notes.hinglish_points</span>.</li>
+        <li>Bookmark writes <span class="mono">bookmarks</span>; "copy" joins points with "• ".</li>
+      </ul>
+    </div>
+  </div>
+  <!-- ---------- S9 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S9 · Flowchart Viewer (step-by-step mechanisms)</span><span class="sno">SCREEN 09</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Mechanisms (MOA, pathways, life cycles) rendered as numbered vertical steps with arrows + a simple diagram. This is the #1 requested format for Hindi-medium students ("step-by-step samjho").</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">"Tetracycline — Mechanism of Action" · stepper mode</div></div>
+        <div class="r">
+          <div class="b">1️⃣ Passive diffusion through porins</div>
+          <div class="b">2️⃣ Binds 30S subunit (reversible)</div>
+        </div>
+        <div class="r"><div class="b">3️⃣ Blocks aminoacyl-tRNA → A-site</div></div>
+        <div class="r"><div class="b">4️⃣ Protein synthesis stops (bacteriostatic)</div></div>
+        <div class="r">
+          <div class="b ghost">SVG diagram panel (auto-generated boxes + arrows)</div>
+          <div class="b ghost">Mode toggle: Stepper | Diagram | Summary table</div>
+        </div>
+        <div class="r"><div class="b ghost">"Mnemonic" chip: 30S = "Thirty = Thiry → stops protein" · Hinglish: "Ye bacteria ka protein banana rok deta hai"</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads <span class="mono">notes.flowchart_json</span>: <span class="mono">{"steps":[{"id":1,"text_en":"…","text_hinglish":"…"}],"arrows":[[1,2],[2,3]]}</span>. Diagram = auto-laid-out vertical boxes (no image upload needed → fast to author and renders in any language).</li>
+        <li>Edge cases: long chains (10+ steps) → paginate 6 steps per screen with "Next step →" — this doubles as a self-test ("recall next step before tapping").</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S10 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S10 · Smart Syllabus / Screenshot Scanner (upload)</span><span class="sno">SCREEN 10 · HERO FEATURE</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Upload a screenshot of <b>syllabus, question paper, or drug list</b>. The AI extracts <u>only</u> the items present in the image (strict whitelist rule) and prepares notes for them.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">📷 "Upload screenshot — syllabus / question paper / drug list"</div></div>
+        <div class="r">
+          <div class="b ghost">Source type selector: 📘 Syllabus · 📝 Question paper · 💊 Drug list</div>
+        </div>
+        <div class="r">
+          <div class="b ghost">Image preview + "Crop / enhance" (contrast boost for blurry photos)</div>
+        </div>
+        <div class="r">
+          <div class="b acc">[🔍 Extract Items — run AI scan]</div>
+          <div class="b ghost">OR paste text (fallback for bad images)</div>
+        </div>
+        <div class="r">
+          <div class="b">Strict-rule banner (always visible):</div>
+        </div>
+        <div class="r"><div class="b gold">"Jo di hui vo drug hee — sirf image mein likhi cheezein padhenge. Koi extra example nahi banayenge."</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Writes: <span class="mono">scanner_sessions</span> (image URL, source_type, status=processing).</li>
+        <li>Full AI pipeline, strict prompts, JSON contract, and the validation step are specified in <b>Section 6</b>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S11 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S11 · Scanner Results — "Only what's in the image"</span><span class="sno">SCREEN 11</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Shows the extracted item checklist (from the image, nothing else), lets the user pick items, and generates point-wise bilingual notes per item. Free users get limited generations/day; premium = unlimited.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">"✅ Extracted from your image — 5 items found" (source image thumb)</div></div>
+        <div class="r">
+          <div class="b acc">☑ 1 · Tetracycline <span class="sub">antibiotic · note ready ✓</span></div>
+          <div class="b acc">☑ 2 · Sulfonamides <span class="sub">antibiotic · ready ✓</span></div>
+        </div>
+        <div class="r">
+          <div class="b acc">☐ 3 · Chloramphenicol <span class="sub">generate</span></div>
+          <div class="b acc">☑ 4 · Erythromycin <span class="sub">ready ✓</span></div>
+        </div>
+        <div class="r"><div class="b">☐ 5 · Griseofulvin <span class="sub">generate</span></div></div>
+        <div class="r">
+          <div class="b acc">[⚡ Generate notes for selected (2)]</div>
+          <div class="b ghost">Free limit: 3/day · 💎 Unlimited with premium</div>
+        </div>
+        <div class="r">
+          <div class="b gold">Strict confirmation: "Items jo image mein nahi the → nahi banaye gaye" (list of ignored non-image items = none)</div>
+        </div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Writes: <span class="mono">scan_items</span> (item_name as-in-image, matched_drug_id, status), then <span class="mono">notes</span> rows generated per selected item.</li>
+        <li>Every generated note stores the source session id + prompt version → full audit trail for the strict rule.</li>
+        <li>Matching: item name → fuzzy match against <span class="mono">drugs.name</span>; if a curated drug note already exists, reuse it (no AI cost) and label "From library ✓".</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S12 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S12 · Premium Store (plans)</span><span class="sno">SCREEN 12</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Monetization: semester-wise packs + full-course subscription, Razorpay checkout, UPI first (India).</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">"PharmaPath Premium" — what's included (3 bullets)</div></div>
+        <div class="r">
+          <div class="b gold">💎 Full Course — ₹499/yr <span class="sub">all 8 sems · all units · PYQs · unlimited scanner · flashcards</span></div>
+        </div>
+        <div class="r">
+          <div class="b">📦 One Semester — ₹99 <span class="sub">all units of chosen sem</span></div>
+          <div class="b">📄 PYQ pack — ₹49 <span class="sub">RUHS solved papers 2019–2024</span></div>
+        </div>
+        <div class="r"><div class="b ghost">Payment: UPI · Card · NetBanking (Razorpay) → success → unlock</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Writes: <span class="mono">purchases</span> (plan, amount, razorpay_payment_id, status=paid, valid_until) → entitlement check on every locked screen.</li>
+        <li>Entitlement rule: <span class="mono">notes.is_premium = false</span> OR user has active purchase covering that sem → visible; else lock overlay → S12.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S13 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S13 · Premium Vault (My Purchases)</span><span class="sno">SCREEN 13</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>The "secure user dashboard" for purchased/premium content: unit-wise premium notes + RUHS previous-years solved papers, gated by plan.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">💎 Premium Vault — plan: Full Course (valid till Mar 2027)</div></div>
+        <div class="r">
+          <div class="b gold">📄 RUHS Solved Papers 2019–2024 <span class="sub">Sem 1–8 · PDF + solved answers</span></div>
+          <div class="b gold">📘 Unit-wise Premium Notes <span class="sub">deep-dive + diagrams (all sems)</span></div>
+        </div>
+        <div class="r">
+          <div class="b">⚡ Scanner boost: 999 scans remaining this month</div>
+          <div class="b">⬇ Downloads &amp; offline pack (PWA)</div>
+        </div>
+        <div class="r"><div class="b ghost">Purchase history · invoices · Razorpay receipt</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads: <span class="mono">purchases</span> joined to <span class="mono">subscription_plans</span>; filters content by entitlements.</li>
+        <li>Security: server-side entitlement check (not just UI hiding) — data rows filtered at the database query level in Bubble/Supabase; in Glide, use user-specific columns + "Private" data binding.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S14 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S14 · Bookmarks &amp; Progress</span><span class="sno">SCREEN 14</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Revision hub: saved notes, per-subject progress bars, weekly streak (motivation), "last studied" list.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">📊 This week: 4.5 hrs · streak 🔥 12 days · 62 notes completed</div></div>
+        <div class="r">
+          <div class="b">🔖 Bookmarks <span class="sub">Tetracycline MOA · Cell structure · Asava-Arishta…</span></div>
+          <div class="b">📈 Progress by semester <span class="sub">Sem 1: 45% · Sem 4: 30% …</span></div>
+        </div>
+        <div class="r"><div class="b ghost">Continue where you left off (list of 3 last notes)</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads/writes: <span class="mono">bookmarks</span>, <span class="mono">progress</span> (status done/started, last_studied_at).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S15 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S15 · Flashcards (revision mode)</span><span class="sno">SCREEN 15</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Quick-fire revision: front (term/question in EN or Hinglish per toggle) → tap → back (answer, 2–3 points).</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">Card 3/20 · Unit 5 Chemotherapy · [Hinglish mode]</div></div>
+        <div class="r"><div class="b">Front: "Tetracycline kis cheez ko rokta hai?"</div></div>
+        <div class="r"><div class="b ghost">(tap to flip)</div></div>
+        <div class="r"><div class="b">Back: "Protein synthesis — 30S subunit par tRNA binding block"</div></div>
+        <div class="r">
+          <div class="b green-pill">😊 Got it</div>
+          <div class="b">🔄 Again</div>
+        </div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads: <span class="mono">flashcards</span> (front_en/front_hinglish/back_…); "Got it" updates <span class="mono">progress</span>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ---------- S16 ---------- -->
+  <div class="screen">
+    <header><span class="sname">S16 · Profile &amp; Settings</span><span class="sno">SCREEN 16</span></header>
+    <div class="body">
+      <h4>Purpose</h4>
+      <p>Account, language default, night mode, font size, current semester (drives dashboard highlight), plan status, logout.</p>
+      <div class="wf">
+        <div class="r"><div class="b acc">👤 Riya · Sem 4 · B.Pharm (RUHS) · 💎 Premium</div></div>
+        <div class="r">
+          <div class="b">🌐 Default language: Hinglish ▾</div>
+          <div class="b">🌙 Night Study mode: ON</div>
+        </div>
+        <div class="r">
+          <div class="b">Aa Font size: 15px ▾</div>
+          <div class="b">🎓 My semester: 4 ▾</div>
+        </div>
+        <div class="r"><div class="b ghost">Notifications · Download offline pack · Help &amp; feedback · Logout</div></div>
+      </div>
+      <h4>Data &amp; logic</h4>
+      <ul>
+        <li>Reads/writes: <span class="mono">users</span> (language_pref, semester, plan_tier, night_mode, font_size).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 5. BILINGUAL ================= -->
+<section id="s5">
+  <span class="sec-no">SECTION 5</span>
+  <h2>Bilingual System (English ⇄ Hinglish ⇄ Hindi)</h2>
+  <p class="lead">The toggle must be instant and cost-free for the user. Design rule: <b>every content row stores all languages at creation time</b> — the toggle is a pure client-side render switch, never a live AI call.</p>
+
+  <h3>5.1 Storage strategy</h3>
+  <table>
+    <tr><th>Column (in notes table)</th><th>Format</th><th>Content</th></tr>
+    <tr><td class="mono">en_points</td><td>JSON array of strings</td><td>Simple English, 1 point = 1 line, ≤ 12 points</td></tr>
+    <tr><td class="mono">hinglish_points</td><td>JSON array of strings</td><td>Roman-script Hindi with English medical terms: <i>"Ye bacteria ke protein synthesis ko rokta hai"</i></td></tr>
+    <tr><td class="mono">hindi_points</td><td>JSON array (optional)</td><td>Devanagari Hindi (added progressively)</td></tr>
+    <tr><td class="mono">flowchart_json</td><td>JSON</td><td>Steps carry <span class="mono">text_en</span> + <span class="mono">text_hinglish</span> per step</td></tr>
+    <tr><td class="mono">glossary_term</td><td>JSON</td><td>Hard terms auto-linked: "ribosome → राइबोसोम (protein banane wali machine)"</td></tr>
+  </table>
+
+  <h3>5.2 Hinglish writing rules (content QA standard)</h3>
+  <ul>
+    <li><b>Keep the medical word in English</b>, explain around it: "Tetracycline <b>30S subunit</b> se bind hota hai" — never transliterate jargon.</li>
+    <li><b>Short sentences, exam-ready verbs:</b> "Ye drug <b>bacteriostatic</b> hai = bacteria ko marta nahi, sirf badhne se rokta hai."</li>
+    <li><b>One idea per point</b> — same structure as English so switching languages maps 1:1 (point index n ↔ point index n).</li>
+    <li><b>Mnemonic hooks:</b> "30S = 30 = teen-zero → 'teeno' proteins band" style memory aids are allowed and encouraged.</li>
+  </ul>
+
+  <h3>5.3 Glossary (the "complex jargon → simple words" layer)</h3>
+  <p>Each hard term in a note gets a tooltip from the <span class="mono">glossary</span> table — one tap explains it in simple language without breaking reading flow:</p>
+  <table>
+    <tr><th>Term</th><th>Simple English</th><th>Hinglish</th></tr>
+    <tr><td>Bacteriostatic</td><td>Stops bacteria from multiplying; does not kill them directly</td><td>Bacteria ko badhne se rokta hai, seedha marta nahi</td></tr>
+    <tr><td>Aminoacyl-tRNA</td><td>The "delivery truck" that brings amino acids to the ribosome</td><td>Amino acid ko ribosome tak pahunchane wali gaadi</td></tr>
+    <tr><td>Pharmacokinetics</td><td>What the body does to the drug (ADME)</td><td>Body drug ke saath kya karti hai (ADME)</td></tr>
+    <tr><td>Sporogony</td><td>Multiplication of the malaria parasite inside the mosquito</td><td>Malaria ke parasite ka mosquito ke andar multiplication</td></tr>
+  </table>
+
+  <h3>5.4 AI fallback translation (for scanner-generated content)</h3>
+  <ol>
+    <li>Scanner generates <span class="mono">en_points</span> for an extracted item.</li>
+    <li>Same AI call also returns <span class="mono">hinglish_points</span> (one call, both outputs — near-zero extra cost).</li>
+    <li>Result is cached in the <span class="mono">notes</span> row → future reads are instant.</li>
+    <li>If a user needs Hindi (Devanagari), a background job translates en_points → hindi_points in bulk nightly (batch API, cheapest model), flagging rows as <span class="mono">hi_ready</span>.</li>
+  </ol>
+  <div class="callout green"><b>Result:</b> the toggle (top bar, global) switches <span class="mono">users.language_pref</span>; every list/detail screen re-renders from the matching column. Zero API latency, works offline.</div>
+</section>
+<!-- ================= 6. SCANNER ================= -->
+<section id="s6">
+  <span class="sec-no">SECTION 6</span>
+  <h2>Smart Syllabus / Screenshot Scanner — Full Design</h2>
+  <p class="lead">The hero feature. It must obey one iron rule: <b>only items physically present in the image get notes — nothing assumed, nothing invented.</b> This is enforced at <u>three levels</u>: (1) the extraction prompt, (2) the per-item generation prompt, (3) a post-generation validation step that deletes anything not in the image list. A single prompt is not enough — the validation step is what makes the rule reliable.</p>
+
+  <h3>6.1 End-to-end flow</h3>
+  <div class="flow">
+    <div class="step">User uploads image</div><span class="arr">→</span>
+    <div class="step">Pre-process (rotate/crop/contrast)</div><span class="arr">→</span>
+    <div class="step">AI Vision: extract items ONLY</div><span class="arr">→</span>
+    <div class="step">Show checklist to user</div><span class="arr">→</span>
+    <div class="step">Generate notes per selected item</div><span class="arr">→</span>
+    <div class="step">Validation pass</div><span class="arr">→</span>
+    <div class="step">Save + display</div>
+  </div>
+
+  <h3>6.2 Step-by-step logic</h3>
+  <table>
+    <tr><th style="width:4%">#</th><th style="width:22%">Step</th><th>What happens</th></tr>
+    <tr><td>1</td><td><b>Upload</b></td><td>Image stored (<span class="mono">scanner_sessions.image_url</span>); user picks source type: <b>Syllabus | Question paper | Drug list</b>. Type changes the extraction prompt slightly (units/topics vs. questions vs. drug names).</td></tr>
+    <tr><td>2</td><td><b>Pre-process</b></td><td>Client-side contrast boost + optional manual crop (blurry phone photos of printed syllabus are the #1 failure mode — a simple "Enhance" filter cuts OCR errors massively).</td></tr>
+    <tr><td>3</td><td><b>Extract (AI Vision call #1)</b></td><td>Image → OpenAI <span class="mono">gpt-4o-mini</span> with the <b>Strict Extraction System Prompt</b> (below). Output = JSON array of items only. Nothing else is generated at this stage.</td></tr>
+    <tr><td>4</td><td><b>User confirmation</b></td><td>Checklist screen (S11): user can uncheck items, fix typos, add one manual item from the image if OCR garbled a word (optional; default = strict).</td></tr>
+    <tr><td>5</td><td><b>Match library</b></td><td>Each item fuzzy-matched against <span class="mono">drugs</span> / <span class="mono">notes</span> tables. Hits → reuse curated content (free, fast, accurate). Misses → go to step 6.</td></tr>
+    <tr><td>6</td><td><b>Generate (AI call #2 per item)</b></td><td>Point-wise bilingual notes with the <b>Per-Item Generation Prompt</b> (below). Runs in parallel (batch), max 10 items per session to control cost.</td></tr>
+    <tr><td>7</td><td><b>Validation pass (the strict guard)</b></td><td>Auto-check: every generated note's title must exist in the extracted item list <i>exactly or by fuzzy match</i>. Any note whose title is <b>not</b> in the image list → deleted/blocked. A system log row records the check ("item X → kept", "item Y → rejected: not in image").</td></tr>
+    <tr><td>8</td><td><b>Save &amp; show</b></td><td>Notes saved to <span class="mono">notes</span> (linked to <span class="mono">scan_items</span> + <span class="mono">scanner_sessions</span>), user opens them in S8/S9; also saved in "My Scans" for revision.</td></tr>
+  </table>
+
+  <h3>6.3 The Strict System Prompts (copy-paste ready)</h3>
+  <div class="card">
+    <h4>Prompt A — Strict Extraction (OCR + whitelist)</h4>
+    <pre><span class="cm"># SYSTEM PROMPT (send as "system" role, image in "user" role)</span>
+You are a STRICT pharmacy syllabus/drug-list OCR assistant.
+
+RULES (mandatory):
+1. Extract ONLY the items (drug names / topics / units / question
+   keywords) that are VISIBLY written in the image.
+2. NEVER add, infer, guess, expand, or auto-complete any item that is
+   not written in the image.
+3. "Jo di hui vo drug hee, not think your side." — if it is not in the
+   image, it does not exist for you.
+4. If a word is unclear, do NOT guess it — omit it (or flag
+   "unclear": true).
+5. Ignore watermarks, page numbers, headers/footers, and logos.
+6. Respond with JSON ONLY, no explanations:
+
+{
+  "source_type": "syllabus" | "question_paper" | "drug_list",
+  "items": [
+    {"name": "EXACT text as written in image",
+     "type": "drug" | "topic" | "unit" | "question",
+     "unclear": false}
+  ]
+}
+
+7. If the image contains no readable text, return {"items": []}.</pre>
+  </div>
+
+  <div class="card">
+    <h4>Prompt B — Per-Item Generation (point-wise bilingual notes)</h4>
+    <pre><span class="cm"># SYSTEM PROMPT (sent once per selected item)</span>
+You are a pharmacy exam-note writer for Hindi-medium B.Pharm students
+(RUHS/PCI pattern).
+
+You will receive ONE item name. Write notes ONLY for that item.
+
+RULES (mandatory):
+1. You MUST NOT write about anything other than the given item.
+2. Never add related drugs, comparisons, or extra examples that were
+   not asked. Stick to the item only.
+3. Format: bullet points only. NO paragraphs. Maximum 12 points.
+4. Each point: one line, simple English, exam-ready.
+5. Points must be ordered: definition → mechanism → uses → side
+   effects (if drug) — matching RUHS 2/5/10-mark answer style.
+6. Respond with JSON ONLY:
+
+{
+  "item": "the item name you received",
+  "points_en": ["..."],
+  "points_hinglish": ["..."],  // same points, Roman Hindi +
+                                // English medical terms, simple words
+  "flowchart_steps": ["step1", "step2", ...]  // if a mechanism/life
+                                // cycle exists; else empty array []
+}
+
+7. If the item is not a pharmacy concept you recognize, still write
+   basic points from the term itself; do not refuse, do not invent
+   unrelated content.</pre>
+  </div>
+
+  <div class="card">
+    <h4>Prompt C — Validation guard (post-generation check)</h4>
+    <pre><span class="cm"># SYSTEM PROMPT (automated verification, no human needed)</span>
+You are a validator. You will receive:
+- "image_items": the list extracted from the user's image (whitelist)
+- "generated_titles": titles of notes the generator produced
+
+For each generated title, check if it matches an image item
+(exact match OR clear fuzzy match of the core term).
+
+Return JSON:
+{
+  "kept":   ["titles that match image_items"],
+  "rejected": ["titles NOT in image_items"]
+}
+
+Rule: any title with no match in image_items MUST go to "rejected".
+The generator must never exceed the whitelist.</pre>
+  </div>
+
+  <div class="callout red"><b>Why three layers?</b> LLMs "hallucinate" — the model may correctly extract 5 drugs but then casually add "Paracetamol" to the notes. Layer B prevents it by prompt, Layer C catches it by checking the output against the whitelist. The validation result is also shown to the user as a trust badge: <i>"✔ Verified: 5/5 notes match your image — koi extra item nahi joda gaya."</i> That badge is your product's trust moat.</div>
+
+  <h3>6.4 Cost &amp; performance budget (indicative)</h3>
+  <table>
+    <tr><th>Operation</th><th>Model</th><th>Typical cost</th></tr>
+    <tr><td>Extraction (1 image)</td><td>gpt-4o-mini (vision)</td><td>~₹0.15–0.40 per image (indicative)</td></tr>
+    <tr><td>Notes generation (per item)</td><td>gpt-4o-mini</td><td>~₹0.05–0.15 per item (indicative)</td></tr>
+    <tr><td>Library hit (curated note exists)</td><td>— (no AI)</td><td>₹0</td></tr>
+  </table>
+  <ul>
+    <li><b>Free tier:</b> 3 scans/month, max 5 items per scan → converts users to premium.</li>
+    <li><b>Premium:</b> unlimited scans + "From library" reuse means repeat scans of the same syllabus cost nothing after the first time.</li>
+    <li><b>Fail-safes:</b> if OpenAI is down → show "Try again in 2 minutes" + paste-text fallback; if extraction returns 0 items → suggest a clearer photo (brightness/angle tips).</li>
+  </ul>
+</section>
+<!-- ================= 7. DATABASE ================= -->
+<section id="s7">
+  <span class="sec-no">SECTION 7</span>
+  <h2>Database Schema — 17 Tables</h2>
+  <p class="lead">Schema is shown in a platform-neutral form; the mapping to Google Sheets (Glide), Airtable, or Supabase/PostgreSQL (FlutterFlow) is in §8. A ready-to-run <span class="mono">schema.sql</span> (PostgreSQL/Supabase) ships alongside this document.</p>
+
+  <h3>7.1 Relationship map (ERD in words)</h3>
+  <div class="card">
+    <pre>
+users 1──N progress · bookmarks · purchases · scanner_sessions
+semesters 1──N subjects
+subjects 1──N units · question_papers
+units 1──N notes · questions
+notes N──1 drugs (drug notes link to monograph) · N──1 questions (answer)
+questions N──1 notes (solved answer)
+scanner_sessions 1──N scan_items
+scan_items N──1 drugs · N──1 notes (generated)
+notes N──N flashcards (per note) · glossary (auto-links)</pre>
+  </div>
+
+  <h3>7.2 Table definitions</h3>
+
+  <div class="tbl">
+    <header><span class="tname">1 · users</span><span class="tpurpose">Every account — free or premium</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid/text</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">phone</span><span class="ftype">text</span><span class="fdesc">+91 number (login identity) <span class="badge uq">UNIQUE</span></span></div>
+      <div class="fld"><span class="fname">email</span><span class="ftype">text</span><span class="fdesc">optional <span class="badge opt">NULL</span></span></div>
+      <div class="fld"><span class="fname">name</span><span class="ftype">text</span><span class="fdesc">display name</span></div>
+      <div class="fld"><span class="fname">language_pref</span><span class="ftype">enum</span><span class="fdesc">en | hinglish | hi — drives the global toggle</span></div>
+      <div class="fld"><span class="fname">semester</span><span class="ftype">int 1–8</span><span class="fdesc">current semester (dashboard highlight)</span></div>
+      <div class="fld"><span class="fname">college / university</span><span class="ftype">text</span><span class="fdesc">e.g., "RUHS-affiliated college"</span></div>
+      <div class="fld"><span class="fname">plan_tier</span><span class="ftype">enum</span><span class="fdesc">free | premium — derived from purchases, cached here</span></div>
+      <div class="fld"><span class="fname">night_mode, font_size</span><span class="ftype">bool/int</span><span class="fdesc">UI prefs (S16)</span></div>
+      <div class="fld"><span class="fname">created_at, last_active</span><span class="ftype">datetime</span><span class="fdesc">analytics + streak calc</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">2 · semesters</span><span class="tpurpose">The 8 fixed containers</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">int</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">sem_no</span><span class="ftype">int 1–8</span><span class="fdesc">order for dashboard <span class="badge uq">UNIQUE</span></span></div>
+      <div class="fld"><span class="fname">title</span><span class="ftype">text</span><span class="fdesc">"Semester 4 — Core Medical"</span></div>
+      <div class="fld"><span class="fname">category</span><span class="ftype">enum</span><span class="fdesc">foundation | core_medical | advanced_clinical</span></div>
+      <div class="fld"><span class="fname">scheme</span><span class="ftype">enum</span><span class="fdesc"><b>pci_2019 | nep_2026</b> — new NEP syllabus rolls in 2026-27; app supports both <span class="badge ai">FUTURE-PROOF</span></span></div>
+      <div class="fld"><span class="fname">description, icon</span><span class="ftype">text</span><span class="fdesc">card subtitle + emoji</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">3 · subjects</span><span class="tpurpose">All PCI/RUHS subjects, Sem 1–8</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">sem_id</span><span class="ftype">int</span><span class="fdesc">→ semesters.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">name</span><span class="ftype">text</span><span class="fdesc">"Pharmacology II"</span></div>
+      <div class="fld"><span class="fname">code</span><span class="ftype">text</span><span class="fdesc">PCI code: BP502T, BP704T…</span></div>
+      <div class="fld"><span class="fname">category</span><span class="ftype">enum</span><span class="fdesc">foundation | core_medical | advanced_clinical (filter chip)</span></div>
+      <div class="fld"><span class="fname">units_count</span><span class="ftype">int</span><span class="fdesc">5 (PCI standard) — progress ring denominator</span></div>
+      <div class="fld"><span class="fname">syllabus_text</span><span class="ftype">text</span><span class="fdesc">raw syllabus (also feeds scanner matching)</span></div>
+      <div class="fld"><span class="fname">color / icon</span><span class="ftype">text</span><span class="fdesc">card accent</span></div>
+      <div class="fld"><span class="fname">is_premium_subject</span><span class="ftype">bool</span><span class="fdesc">whole-subject premium packs</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">4 · units</span><span class="tpurpose">Unit 1–5 per subject (PCI structure)</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">subject_id</span><span class="ftype">uuid</span><span class="fdesc">→ subjects.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">unit_no</span><span class="ftype">int 1–5</span><span class="fdesc">order</span></div>
+      <div class="fld"><span class="fname">title</span><span class="ftype">text</span><span class="fdesc">"Unit 5 — Chemotherapy (Antibiotics)"</span></div>
+      <div class="fld"><span class="fname">description</span><span class="ftype">text</span><span class="fdesc">1-line scope (Hinglish friendly)</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">5 · notes</span><span class="tpurpose">THE content table — point-wise, bilingual, flowcharted</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">unit_id</span><span class="ftype">uuid</span><span class="fdesc">→ units.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">subject_id</span><span class="ftype">uuid</span><span class="fdesc">→ subjects.id (denormalized for fast search) <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">title</span><span class="ftype">text</span><span class="fdesc">"Tetracycline — Mechanism of Action"</span></div>
+      <div class="fld"><span class="fname">note_type</span><span class="ftype">enum</span><span class="fdesc">topic | drug | answer | definition | flowchart</span></div>
+      <div class="fld"><span class="fname">en_points</span><span class="ftype">json[]</span><span class="fdesc"><b>bullet points, never paragraphs</b> — schema enforces the formatting rule <span class="badge ai">KEY</span></span></div>
+      <div class="fld"><span class="fname">hinglish_points</span><span class="ftype">json[]</span><span class="fdesc">parallel array (index n ↔ index n)</span></div>
+      <div class="fld"><span class="fname">hindi_points</span><span class="ftype">json[]</span><span class="fdesc">optional Devanagari <span class="badge opt">NULL</span></span></div>
+      <div class="fld"><span class="fname">flowchart_json</span><span class="ftype">json</span><span class="fdesc">{"steps":[{text_en,text_hinglish}],"arrows":[[1,2]]} <span class="badge opt">NULL</span></span></div>
+      <div class="fld"><span class="fname">marks</span><span class="ftype">int</span><span class="fdesc">2 | 5 | 10 — for answer-type notes (RUHS pattern)</span></div>
+      <div class="fld"><span class="fname">tags</span><span class="ftype">json[]</span><span class="fdesc">["antibiotic","MOA","chemotherapy"] → search + related</span></div>
+      <div class="fld"><span class="fname">is_premium</span><span class="ftype">bool</span><span class="fdesc">premium gate flag</span></div>
+      <div class="fld"><span class="fname">source_session_id</span><span class="ftype">uuid</span><span class="fdesc">→ scanner_sessions.id if AI-generated (audit trail) <span class="badge opt">NULL</span></span></div>
+      <div class="fld"><span class="fname">views, created_at, updated_at</span><span class="ftype">int/datetime</span><span class="fdesc">popularity + content versioning</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">6 · drugs</span><span class="tpurpose">Drug monograph index — also the scanner's matching dictionary</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">name</span><span class="ftype">text</span><span class="fdesc">"Tetracycline" <span class="badge uq">UNIQUE</span></span></div>
+      <div class="fld"><span class="fname">aliases</span><span class="ftype">json[]</span><span class="fdesc">brand names + common misspellings → fuzzy scanner matching</span></div>
+      <div class="fld"><span class="fname">class</span><span class="ftype">text</span><span class="fdesc">"Tetracycline antibiotics"</span></div>
+      <div class="fld"><span class="fname">moa_points</span><span class="ftype">json[]</span><span class="fdesc">point-wise mechanism (fast answer building)</span></div>
+      <div class="fld"><span class="fname">uses, side_effects, contraindications</span><span class="ftype">json[]</span><span class="fdesc">point-wise lists</span></div>
+      <div class="fld"><span class="fname">related_note_id</span><span class="ftype">uuid</span><span class="fdesc">→ notes.id (full study note) <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">subject_tags</span><span class="ftype">json[]</span><span class="fdesc">["pharmacology II","medicinal chemistry"]</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">7 · question_papers</span><span class="tpurpose">RUHS previous years' papers (premium)</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">subject_id</span><span class="ftype">uuid</span><span class="fdesc">→ subjects.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">year, term</span><span class="ftype">int/text</span><span class="fdesc">2023 · "Annual/Main"</span></div>
+      <div class="fld"><span class="fname">paper_url, solved_url</span><span class="ftype">file</span><span class="fdesc">PDF + solved version</span></div>
+      <div class="fld"><span class="fname">is_premium</span><span class="ftype">bool</span><span class="fdesc">true</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">8 · questions</span><span class="tpurpose">Individual exam questions with links to answers</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">subject_id / unit_id</span><span class="ftype">uuid</span><span class="fdesc">location <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">question_text</span><span class="ftype">text</span><span class="fdesc">"Explain mechanism of action of tetracycline."</span></div>
+      <div class="fld"><span class="fname">marks</span><span class="ftype">int</span><span class="fdesc">2 | 5 | 10</span></div>
+      <div class="fld"><span class="fname">year, is_important</span><span class="ftype">int/bool</span><span class="fdesc">asked in RUHS year · flagged for "Important Qs" tab</span></div>
+      <div class="fld"><span class="fname">answer_note_id</span><span class="ftype">uuid</span><span class="fdesc">→ notes.id (solved answer) <span class="badge fk">FK</span></span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">9 · scanner_sessions</span><span class="tpurpose">One row per uploaded screenshot</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">user_id</span><span class="ftype">uuid</span><span class="fdesc">→ users.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">image_url</span><span class="ftype">file</span><span class="fdesc">stored screenshot</span></div>
+      <div class="fld"><span class="fname">source_type</span><span class="ftype">enum</span><span class="fdesc">syllabus | question_paper | drug_list</span></div>
+      <div class="fld"><span class="fname">status</span><span class="ftype">enum</span><span class="fdesc">processing | reviewed | completed | failed</span></div>
+      <div class="fld"><span class="fname">extracted_items_json</span><span class="ftype">json</span><span class="fdesc">raw AI extraction output (audit)</span></div>
+      <div class="fld"><span class="fname">validation_log</span><span class="ftype">json</span><span class="fdesc"><b>strict-rule check results</b>: kept[] vs rejected[] <span class="badge ai">KEY</span></span></div>
+      <div class="fld"><span class="fname">prompt_version</span><span class="ftype">text</span><span class="fdesc">prompt A/B/C version used</span></div>
+      <div class="fld"><span class="fname">created_at</span><span class="ftype">datetime</span><span class="fdesc">free-tier quota check basis</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">10 · scan_items</span><span class="tpurpose">Each extracted item + its generated note</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">session_id</span><span class="ftype">uuid</span><span class="fdesc">→ scanner_sessions.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">item_name</span><span class="ftype">text</span><span class="fdesc">exact text as in image</span></div>
+      <div class="fld"><span class="fname">item_type</span><span class="ftype">enum</span><span class="fdesc">drug | topic | unit | question</span></div>
+      <div class="fld"><span class="fname">matched_drug_id</span><span class="ftype">uuid</span><span class="fdesc">→ drugs.id if library hit <span class="badge opt">NULL</span> <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">generated_note_id</span><span class="ftype">uuid</span><span class="fdesc">→ notes.id <span class="badge opt">NULL</span> <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">status</span><span class="ftype">enum</span><span class="fdesc">pending | generated | library | rejected_by_validation</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">11 · bookmarks</span><span class="tpurpose">User saves</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">user_id</span><span class="ftype">uuid</span><span class="fdesc">→ users.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">item_type, item_id</span><span class="ftype">text/uuid</span><span class="fdesc">note | drug | question | paper</span></div>
+      <div class="fld"><span class="fname">created_at</span><span class="ftype">datetime</span><span class="fdesc">order by</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">12 · progress</span><span class="tpurpose">Study tracking</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">user_id</span><span class="ftype">uuid</span><span class="fdesc">→ users.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">item_type, item_id</span><span class="ftype">text/uuid</span><span class="fdesc">note | unit | question</span></div>
+      <div class="fld"><span class="fname">status</span><span class="ftype">enum</span><span class="fdesc">started | done</span></div>
+      <div class="fld"><span class="fname">last_studied_at, study_seconds</span><span class="ftype">datetime/int</span><span class="fdesc">streak + weekly hours</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">13 · flashcards</span><span class="tpurpose">Revision cards</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">note_id / unit_id</span><span class="ftype">uuid</span><span class="fdesc">origin <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">front_en, front_hinglish</span><span class="ftype">text</span><span class="fdesc">question/term both languages</span></div>
+      <div class="fld"><span class="fname">back_en, back_hinglish</span><span class="ftype">text</span><span class="fdesc">answer 1–3 points</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">14 · glossary</span><span class="tpurpose">Jargon → simple language (tooltips)</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">term</span><span class="ftype">text</span><span class="fdesc">"bacteriostatic" <span class="badge uq">UNIQUE</span></span></div>
+      <div class="fld"><span class="fname">simple_en</span><span class="ftype">text</span><span class="fdesc">one-line simple definition</span></div>
+      <div class="fld"><span class="fname">hinglish</span><span class="ftype">text</span><span class="fdesc">simple Hinglish definition</span></div>
+      <div class="fld"><span class="fname">subject_tags</span><span class="ftype">json[]</span><span class="fdesc">context</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">15 · purchases</span><span class="tpurpose">Payment records (Razorpay/Stripe)</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">user_id</span><span class="ftype">uuid</span><span class="fdesc">→ users.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">plan_id</span><span class="ftype">uuid</span><span class="fdesc">→ subscription_plans.id <span class="badge fk">FK</span></span></div>
+      <div class="fld"><span class="fname">amount, currency</span><span class="ftype">int/text</span><span class="fdesc">₹499 · INR</span></div>
+      <div class="fld"><span class="fname">gateway, payment_id</span><span class="ftype">text</span><span class="fdesc">razorpay | stripe · transaction ref</span></div>
+      <div class="fld"><span class="fname">status</span><span class="ftype">enum</span><span class="fdesc">pending | paid | failed | refunded</span></div>
+      <div class="fld"><span class="fname">valid_until</span><span class="ftype">datetime</span><span class="fdesc">entitlement expiry</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">16 · subscription_plans</span><span class="tpurpose">Plan catalog</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">id</span><span class="ftype">uuid</span><span class="fdesc">PK <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">name, price, duration_days</span><span class="ftype">text/int</span><span class="fdesc">"Full Course" · 499 · 365</span></div>
+      <div class="fld"><span class="fname">features_json</span><span class="ftype">json</span><span class="fdesc">which sems/features unlock</span></div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <header><span class="tname">17 · app_meta</span><span class="tpurpose">Content versioning &amp; flags</span></header>
+    <div class="rows">
+      <div class="fld"><span class="fname">key</span><span class="ftype">text</span><span class="fdesc">content_version · prompt_version · banner_text <span class="badge pk">PK</span></span></div>
+      <div class="fld"><span class="fname">value</span><span class="ftype">text/json</span><span class="fdesc">"2026.08.1" etc. — lets you update prompts &amp; banners without an app release</span></div>
+    </div>
+  </div>
+
+  <h3>7.3 Sample rows (proof the schema works for your examples)</h3>
+  <table>
+    <tr><th>Table</th><th>Sample row</th></tr>
+    <tr><td class="mono">drugs</td><td><b>Tetracycline</b> · aliases: ["Achromycin","tetrasaiklin"] · class: "Tetracyclines" · moa_points: ["Penetrates cell wall via porins (passive diffusion)","Binds 30S ribosomal subunit reversibly","Blocks aminoacyl-tRNA attachment at A-site","Stops protein synthesis → bacteriostatic"]</td></tr>
+    <tr><td class="mono">notes</td><td><b>"Tetracycline — Mechanism of Action"</b> · type: drug · marks: 10 · en_points: 8 points · hinglish_points: parallel 8 · flowchart_json: 4 steps + arrows · tags: ["antibiotic","MOA","chemotherapy"] · is_premium: false (teaser) / true (deep version)</td></tr>
+    <tr><td class="mono">notes</td><td><b>"Malaria — Plasmodium Life Cycle (Etiology)"</b> · type: flowchart · en_points: 7 · flowchart steps: 1. Sporozoites (mosquito bite) → 2. Liver (hepatic schizogony) → 3. Merozoites → RBC → 4. Erythrocytic schizogony → 5. RBC rupture → fever → 6. Gametocytes → 7. Mosquito (sporogony)</td></tr>
+    <tr><td class="mono">questions</td><td><b>"Explain mechanism of action of tetracycline."</b> · marks: 10 · year: 2023 · is_important: true · answer_note_id → the note above</td></tr>
+    <tr><td class="mono">scanner_sessions</td><td>user 42 · drug_list image · status: completed · extracted_items_json: ["Tetracycline","Sulfonamides","Chloramphenicol","Erythromycin","Griseofulvin"] · validation_log: kept 5, rejected 0</td></tr>
+  </table>
+</section>
+<!-- ================= 8. NO-CODE BUILD ================= -->
+<section id="s8">
+  <span class="sec-no">SECTION 8</span>
+  <h2>No-Code Build Plan — Step by Step</h2>
+
+  <h3>8.1 Platform matrix (decide once, up front)</h3>
+  <table>
+    <tr><th>Capability</th><th>Glide (V1 ⭐)</th><th>Bubble</th><th>FlutterFlow</th></tr>
+    <tr><td>Speed to MVP</td><td><b>4–6 weeks</b></td><td>8–10 weeks</td><td>8–12 weeks</td></tr>
+    <tr><td>AI Vision calls</td><td>Glide AI Actions (native) or Make.com webhook</td><td>API Connector + workflow</td><td>AI Actions / custom API</td></tr>
+    <tr><td>Phone OTP auth</td><td>Glide Sign-In (email/OTP via providers)</td><td>Native + plugins</td><td>Supabase Auth + OTP</td></tr>
+    <tr><td>Razorpay (India)</td><td>Via Stripe/Razorpay integration or Paddle</td><td>Razorpay plugin ⭐</td><td>Razorpay SDK ⭐</td></tr>
+    <tr><td>Offline reading (late-night hostels 📶)</td><td>PWA caching (partial)</td><td>Weak</td><td><b>Native offline ⭐</b></td></tr>
+    <tr><td>App Store release</td><td>Yes (Glide builds the wrappers)</td><td>Web-first, wrappers extra</td><td><b>Yes, native ⭐</b></td></tr>
+    <tr><td>Monthly cost (start)</td><td><b>~$30–60</b></td><td>~$30–120</td><td>~$30–70 + Supabase</td></tr>
+    <tr><td>Verdict</td><td><b>Build V1 here — validate, get users, earn</b></td><td>Pick if you need deep custom logic</td><td><b>Migrate to V2 when revenue supports it</b></td></tr>
+  </table>
+
+  <h3>8.2 The 10-phase build roadmap (Glide fast track shown; Bubble/FlutterFlow notes inline)</h3>
+
+  <div class="screen">
+    <header><span class="sname">Phase 0 · Data foundation (Week 1)</span><span class="sno">ALL PATHS</span></header>
+    <div class="body">
+      <ol>
+        <li>Create a Google Sheet workbook with 17 tabs named exactly like the tables in §7 (column headers = field names). Seed it with the <b>starter pack</b>: 8 semester rows, all 43 subjects (Sem 1–8, PCI codes), 5 units per subject (Unit 1–5 shells), ~60 curated notes (Sem 1: HAP-I, Pharmaceutics-I, Pharmaceutical Analysis-I; Sem 4: Pharmacology-II with Tetracycline/Chloroquine; Sem 7: NDDS; Sem 8: Biostatistics), 50 drug monograph rows, 40 RUHS PYQs (2019–2024), 100 flashcards, 200 glossary terms.</li>
+        <li>Bubble/FlutterFlow path: create the same schema in Airtable or Supabase (run the included <span class="mono">schema.sql</span>).</li>
+        <li><b>Rule:</b> enter content only in the JSON array columns — the "no paragraphs" rule is enforced by the data structure itself (validator script checks: every element is a string ≤ 200 chars, no element contains ". " sentence chains).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 1 · App shell &amp; theme (Week 1)</span><span class="sno">GLIDE</span></header>
+    <div class="body">
+      <ol>
+        <li>New Glide app ← connect the workbook. App name "PharmaPath", icon (graduation cap + capsule).</li>
+        <li>Theme editor → colors = tokens from §4.0: canvas #F4F8FC, primary #2E6FB7, text #16324F. Add a second theme "Night Study" (#0E1B2C) bound to <span class="mono">users.night_mode</span>.</li>
+        <li>Components: Top bar with app title + two toggle buttons (language, night mode). Bottom nav = 5 tabs (Home/Search/Scanner/Vault/Profile) — Glide "Tab bar".</li>
+        <li>Auth: Glide Sign-In, phone + email enabled. Create <span class="mono">users</span> row on first login (language_pref from onboarding).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 2 · Home Dashboard (Week 2)</span><span class="sno">GLIDE</span></header>
+    <div class="body">
+      <ol>
+        <li>Screen: Home → add <b>Horizontal/Grid layout (Repeating Group)</b> bound to <span class="mono">semesters</span> sorted by sem_no. Each card: sem_no big number, title, subject count (relation), progress ring (user-specific progress relation).</li>
+        <li>Above the grid: Search input (→ Search screen), Scanner CTA button (→ Scanner screen), Premium banner (shown only if <span class="mono">users.plan_tier = free</span>).</li>
+        <li>Below: "Continue studying" row = most recent <span class="mono">progress</span> row for the user → deep link to that note.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 3 · Semester → Subject → Unit drill-down (Week 2–3)</span><span class="sno">GLIDE</span></header>
+    <div class="body">
+      <ol>
+        <li><b>Semester screen:</b> detail screen of semesters table → Repeating Group of <span class="mono">subjects</span> (filtered by sem_id). Subject card: name, code, category chip, lock icon if premium.</li>
+        <li><b>Subject screen:</b> tabs component (Units / Important Qs / PYQs / Flashcards) — Glide "Tabs" with 4 sub-screens sharing the subject context.</li>
+        <li><b>Units tab:</b> list of <span class="mono">units</span>; <b>Qs tab:</b> list of <span class="mono">questions</span> where is_important=true; <b>PYQs tab:</b> <span class="mono">question_papers</span>; <b>Flashcards tab:</b> <span class="mono">flashcards</span>.</li>
+        <li>Bubble: RepeatingGroups + Option Sets; FlutterFlow: ListView + PageView tabs.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 4 · Note viewer + bilingual toggle + flowchart (Week 3)</span><span class="sno">GLIDE · CORE UX</span></header>
+    <div class="body">
+      <ol>
+        <li><b>Note screen:</b> detail screen of <span class="mono">notes</span> → show <span class="mono">en_points</span> as an <b>Inline list</b> (each array element = one bullet row).</li>
+        <li><b>Bilingual toggle:</b> two-component trick — one Inline list bound to <span class="mono">en_points</span>, one to <span class="mono">hinglish_points</span>, each with a "Show only when" visibility condition on <span class="mono">users.language_pref</span>. The top-bar toggle updates the user row; screens re-render automatically. (Same pattern in Bubble: two groups + conditionals; FlutterFlow: switch + IndexedStack.)</li>
+        <li><b>Flowchart:</b> the note's "View flowchart" button → flowchart screen: Vertical stepper = Inline list of <span class="mono">flowchart_json.steps</span> (numbered, arrow separators). Diagram mode: SVG image generated once per flowchart at content-creation time (designer creates in Canva/Excalidraw, or auto-render via a tiny script) and stored as an image column.</li>
+        <li>Bookmark button → creates <span class="mono">bookmarks</span> row; Copy button → "Copy text to clipboard" action joining points with "• ".</li>
+        <li><b>Premium gate:</b> if <span class="mono">notes.is_premium = true</span> and user has no covering purchase → show lock overlay + "Unlock" → Premium store. (Bubble/Supabase: do the check in the query too, not just UI.)</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 5 · Search &amp; filters (Week 3)</span><span class="sno">GLIDE</span></header>
+    <div class="body">
+      <ol>
+        <li>Search screen: big search input with "Search in" = relation to <span class="mono">notes</span> title/tags (Glide "Search" component) + result rows grouped by note_type.</li>
+        <li>Filter chips row: Semester ▾ (1–8), Category ▾ (Foundation/Core/Advanced), Type ▾ (Notes/Drugs/Qs/PYQs), Marks ▾ — each chip = a filter bound to the relation; combine with "Filter by conditions".</li>
+        <li>Also search <span class="mono">drugs</span> and <span class="mono">questions</span> via their own search components on the same screen (tabbed).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 6 · Smart Scanner (Weeks 4–5) — the hero feature</span><span class="sno">GLIDE + MAKE.COM + OPENAI</span></header>
+    <div class="body">
+      <h4>Step-by-step wiring (no code written):</h4>
+      <ol>
+        <li><b>Upload:</b> Glide "File" column on <span class="mono">scanner_sessions</span> (image) + source_type selector. A "Scan now" button triggers a Glide AI Action OR a Make.com webhook (HTTP request to Make).</li>
+        <li><b>Make.com scenario (5 modules):</b>
+          <ol style="list-style:lower-alpha; margin-top:6px">
+            <li><b>Webhook</b> — receives image URL + source_type from Glide.</li>
+            <li><b>HTTP / Google Drive</b> — downloads image.</li>
+            <li><b>OpenAI module — "Create Chat Completion"</b> — model <span class="mono">gpt-4o-mini</span>, system message = <b>Prompt A (§6.3)</b>, user message = image (vision) + source_type. Parse JSON output.</li>
+            <li><b>Router</b> — for each extracted item: check fuzzy match against <span class="mono">drugs</span> tab (Google Sheets lookup); if hit → mark library; if miss → second OpenAI call with <b>Prompt B</b> per item (can run in a loop module, max 10 items).</li>
+            <li><b>Sheets module</b> — writes <span class="mono">scan_items</span> rows + generated <span class="mono">notes</span> rows; then <b>Prompt C validation</b> module compares generated titles vs whitelist and writes <span class="mono">validation_log</span>; rejected rows deleted.</li>
+          </ol>
+        </li>
+        <li><b>Bubble path:</b> API Connector → "OpenAI Chat" (image_url content type) → workflows: FileUploader → "Scan" → parse JSON → create Things. <b>FlutterFlow path:</b> AI Action with custom prompt + API call, results into Supabase.</li>
+        <li><b>Results screen:</b> Repeating Group of <span class="mono">scan_items</span> for the session (checkboxes = Glide "Toggle" column on the row; "Generate" button runs the Make scenario for pending items; free-tier counter = count of sessions this month from <span class="mono">scanner_sessions</span>).</li>
+        <li><b>Trust badge:</b> show validation_log summary on the results screen ("✔ 5/5 items verified — sirf image wale items").</li>
+      </ol>
+      <div class="callout"><b>Testing the strict rule:</b> before launch, run a test battery of 20 images: clean drug lists, blurry syllabus photos, question papers with mixed content, and 3 deliberately "tricky" images where a similar-sounding drug appears in the watermark/footer. Acceptance = extraction contains <u>only</u> image items in 18/20, and validation rejects 100% of hallucinated titles.</div>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 7 · Premium &amp; payments (Week 5)</span><span class="sno">GLIDE + RAZORPAY</span></header>
+    <div class="body">
+      <ol>
+        <li>Premium store screen: 3 plan cards from <span class="mono">subscription_plans</span> (Full Course ₹499/yr · One Semester ₹99 · PYQ pack ₹49).</li>
+        <li>Checkout: Glide → Razorpay via integration (or Glide Payments / Paddle as fallback; Bubble: Razorpay plugin; FlutterFlow: Razorpay SDK with Supabase Edge Function for verification).</li>
+        <li>Webhook (Make.com or Razorpay webhook) → on payment.captured: create <span class="mono">purchases</span> row + set <span class="mono">users.plan_tier = premium</span> → UI unlocks instantly.</li>
+        <li><b>Entitlement query:</b> everywhere notes are listed, add condition "is_premium = false OR user's purchases.valid_until &gt; today" — this single condition protects all premium content.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 8 · User data screens (Week 5–6)</span><span class="sno">GLIDE</span></header>
+    <div class="body">
+      <ol>
+        <li>Bookmarks &amp; Progress screen: two tabs — Repeating Group of <span class="mono">bookmarks</span> (user-specific) and progress stats (sum of done notes per sem, streak = consecutive active days from <span class="mono">progress.last_studied_at</span>).</li>
+        <li>Profile screen: user row form (name, semester, language, night mode, font size) + plan status + logout.</li>
+        <li>Mark "study done": each note screen has a "✔ Mark done" button → upsert <span class="mono">progress</span> row.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 9 · QA &amp; content audit (Week 6)</span><span class="sno">ALL PATHS</span></header>
+    <div class="body">
+      <ol>
+        <li>Content QA checklist run per note (see §10) — verify zero paragraphs, parallel EN/Hinglish point counts, flowchart present where flagged.</li>
+        <li>Functionality test matrix: 8 semesters × navigation × toggle × search × scanner battery (20 test images) × premium lock/unlock × payment sandbox (Razorpay test mode).</li>
+        <li>Performance: first load &lt; 3s on a mid-range Android (test on 4GB RAM device); PWA offline pack for V1.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header><span class="sname">Phase 10 · Publish &amp; launch (Week 6)</span><span class="sno">GLIDE</span></header>
+    <div class="body">
+      <ol>
+        <li>Glide → Publish: web PWA (shareable link) + Glide builds iOS/Android apps for Play Store (₹ one-time) and App Store ($99/yr).</li>
+        <li>Launch checklist: privacy policy + terms (mandatory for Play Store), contact/feedback screen, analytics events (screen views, toggle usage, scanner conversions), RUHS student WhatsApp/Telegram groups for the first 500 users.</li>
+        <li>V2 (when revenue supports): migrate data to Supabase, rebuild UI in FlutterFlow for native performance + offline, add in-app Hindi audio notes, community discussion per unit.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 9. RUHS ================= -->
+<section id="s9">
+  <span class="sec-no">SECTION 9</span>
+  <h2>RUHS Alignment — Curriculum Map (PCI scheme, as followed by RUHS)</h2>
+  <p class="lead">The app's content skeleton. All 43 theory subjects of the PCI B.Pharm scheme, grouped by semester, with your Foundation / Core Medical / Advanced &amp; Clinical tracks. (New NEP-2026 scheme starts for fresh batches in 2026-27 — the <span class="mono">scheme</span> field in §7 handles both.)</p>
+
+  <table>
+    <tr><th>Sem</th><th>Track</th><th>Theory subjects (PCI codes)</th></tr>
+    <tr><td><b>1</b></td><td>Foundation</td><td>Human Anatomy &amp; Physiology I (BP101T) · Pharmaceutical Analysis I (BP102T) · <b>Pharmaceutics I (BP103T)</b> · Pharmaceutical Inorganic Chemistry (BP104T) · Communication Skills (BP105T) · Remedial Biology/Maths (BP106RBT/RMT)</td></tr>
+    <tr><td><b>2</b></td><td>Foundation</td><td>Human Anatomy &amp; Physiology II (BP201T) · Pharmaceutical Organic Chemistry I (BP202T) · Biochemistry (BP203T) · Pathophysiology (BP204T) · Computer Applications in Pharmacy (BP205T) · Environmental Sciences (BP206T)</td></tr>
+    <tr><td><b>3</b></td><td>Foundation</td><td>Pharmaceutical Organic Chemistry II (BP301T) · Physical Pharmaceutics I (BP302T) · Pharmaceutical Microbiology (BP303T) · Pharmaceutical Engineering (BP304T)</td></tr>
+    <tr><td><b>4</b></td><td>Core Medical</td><td>Pharmaceutical Organic Chemistry III (BP401T) · Medicinal Chemistry I (BP402T) · Physical Pharmaceutics II (BP403T) · <b>Pharmacology I (BP404T)</b> · <b>Pharmacognosy &amp; Phytochemistry I (BP405T)</b></td></tr>
+    <tr><td><b>5</b></td><td>Core Medical</td><td>Medicinal Chemistry II (BP501T) · <b>Pharmacology II (BP502T)</b> — antibiotics, MOA (tetracycline), antimalarials (malaria etiology) · <b>Pharmacognosy &amp; Phytochemistry II (BP503T)</b> — Ayurvedic formulations · Pharmaceutical Jurisprudence (BP504T) · Industrial Pharmacy I (BP505T)</td></tr>
+    <tr><td><b>6</b></td><td>Core Medical</td><td>Medicinal Chemistry III (BP601T) · <b>Pharmacology III (BP602T)</b> — incl. toxicology units · Herbal Drug Technology (BP603T) · Biopharmaceutics &amp; Pharmacokinetics (BP604T) · <b>Pharmaceutical Biotechnology (BP605T)</b> — gene transfer techniques, unit-wise · Quality Assurance (BP606T)</td></tr>
+    <tr><td><b>7</b></td><td>Advanced &amp; Clinical</td><td>Instrumental Methods of Analysis (BP701T) · Industrial Pharmacy II (BP702T) · <b>Pharmacy Practice (BP703T)</b> · <b>Novel Drug Delivery Systems (BP704T)</b></td></tr>
+    <tr><td><b>8</b></td><td>Advanced &amp; Clinical</td><td><b>Biostatistics &amp; Research Methodology (BP801T)</b> · Social &amp; Preventive Pharmacy (BP802T) · Electives (BP803ET–BP812ET): Pharma Marketing, Regulatory Science, Pharmacovigilance, QC of Herbals, CADD, Cell &amp; Molecular Biology, Cosmetic Science, Experimental Pharmacology, Advanced Instrumentation, Nutraceuticals</td></tr>
+  </table>
+
+  <h3>9.1 RUHS exam-pattern awareness (built into the app)</h3>
+  <ul>
+    <li><b>Typical university theory paper (70 marks, 3 hrs)</b> — PCI-pattern papers as conducted by RUHS combine: objective/MCQ section (~10–15 marks), long answers 10 marks (with internal choice), short answers 5–8 marks (with internal choice). Practical exams: 70 marks (synopsis + major/minor experiments + viva).</li>
+    <li><b>Design consequence:</b> every answer-type note carries a <span class="mono">marks</span> field (2/5/10) and the note screen shows a "For 10-mark answer, add: [extra points]" expander — answers are structured as <i>definition → mechanism → classification → uses → side effects</i>, which is exactly how RUHS examiners award marks.</li>
+    <li><b>PYQ module:</b> question_papers table stores RUHS papers by year (2019–2024+); solved versions link each question to its answer note. The Scanner's "question paper" source type lets students snap any year's paper and instantly get answer notes for exactly the questions asked.</li>
+    <li><b>Note:</b> verify exact current paper structure from the official RUHS/college handbook at content-creation time; the schema (marks, choices) accommodates any variant without redesign.</li>
+  </ul>
+</section>
+<!-- ================= 10. CONTENT RULES ================= -->
+<section id="s10">
+  <span class="sec-no">SECTION 10</span>
+  <h2>Content Formatting Rules (the "No Paragraphs" Law)</h2>
+  <p class="lead">Your rule is absolute — so it is enforced by the system, not by habit. Four enforcement layers:</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>Layer 1 · Schema</h4>
+      <p class="small">Content lives only in <span class="mono">json[]</span> columns. A paragraph physically cannot be stored as a single value — it must be split into array elements.</p>
+    </div>
+    <div class="card">
+      <h4>Layer 2 · AI prompt</h4>
+      <p class="small">Prompt B (§6.3) mandates "bullet points only, max 12, one line each, NO paragraphs" — every generated note obeys the rule at birth.</p>
+    </div>
+    <div class="card">
+      <h4>Layer 3 · QA validator</h4>
+      <p class="small">A scheduled check (Make.com monthly) scans all notes: any element &gt; 200 chars or containing ". " multi-sentence chains → flagged for rewrite.</p>
+    </div>
+    <div class="card">
+      <h4>Layer 4 · UI</h4>
+      <p class="small">The renderer always displays points as bullet rows with spacing — even long content stays visually scannable; "copy" joins with "• ".</p>
+    </div>
+  </div>
+
+  <h3>10.1 The 7-point content QA checklist (per note)</h3>
+  <ul class="check">
+    <li><b>Point-wise:</b> zero paragraphs; each point = one idea, one line (≤ ~25 words).</li>
+    <li><b>Flowchart present</b> where the topic has a mechanism/life-cycle/process (MOA, ADME, synthesis steps, malaria cycle, gene transfer techniques).</li>
+    <li><b>Bilingual parity:</b> en_points.length = hinglish_points.length; index n maps 1:1.</li>
+    <li><b>Simple-English rule:</b> complex jargon first appears with its simple meaning, or links a glossary tooltip.</li>
+    <li><b>Exam structure:</b> answer-type notes follow definition → mechanism → classification → uses → side effects; marks field set (2/5/10).</li>
+    <li><b>No invented content:</b> (for scanner notes) title present in the image whitelist — validation log attached.</li>
+    <li><b>Tags &amp; related:</b> 2–5 tags + related-note links for "people also studied".</li>
+  </ul>
+</section>
+
+<!-- ================= 11. PREMIUM ================= -->
+<section id="s11">
+  <span class="sec-no">SECTION 11</span>
+  <h2>Premium &amp; Monetization Design</h2>
+  <h3>11.1 Plans (indicative pricing — tune after testing)</h3>
+  <table>
+    <tr><th>Plan</th><th>Price (indicative)</th><th>Includes</th></tr>
+    <tr><td><b>Free</b></td><td>₹0</td><td>All 8 semesters visible · 1–2 sample notes per subject · 3 scanner scans/month · 1 flashcard deck</td></tr>
+    <tr><td><b>💎 Full Course</b></td><td>₹499 / year</td><td>All units &amp; notes (8 sems) · deep notes + diagrams · RUHS solved papers 2019–2024 · unlimited scanner · all flashcards · offline pack</td></tr>
+    <tr><td><b>📦 One Semester</b></td><td>₹99</td><td>All premium content of one chosen semester (great entry price)</td></tr>
+    <tr><td><b>📄 PYQ Pack</b></td><td>₹49</td><td>Solved RUHS papers for all semesters (standalone upsell)</td></tr>
+  </table>
+  <h3>11.2 Entitlement logic (the only rule you need)</h3>
+  <div class="card">
+    <pre><span class="cm"># Pseudocode — used in every list &amp; detail query</span>
+<span class="k">can_view</span>(note, user):
+  if note.is_premium == false:  return TRUE
+  plan = user.active_purchase()   <span class="cm"># purchases WHERE status=paid AND valid_until > now</span>
+  if plan == null:                return FALSE   <span class="cm"># show lock overlay</span>
+  return plan.covers(note)        <span class="cm"># full_course → all; one_semester → note.subject.sem_id</span></pre>
+  </div>
+  <ul>
+    <li><b>Security:</b> in Bubble/Supabase the filter runs in the database query (not just hidden UI); in Glide, use user-specific rows/relations so data is only bound to matching users.</li>
+    <li><b>Scanner quota:</b> count <span class="mono">scanner_sessions</span> in the current month → free = 3, premium = unlimited (store counter in users row to avoid a heavy query).</li>
+    <li><b>Receipts:</b> purchases rows double as invoices; Razorpay sends email receipts automatically.</li>
+  </ul>
+</section>
+
+<!-- ================= 12. ROADMAP ================= -->
+<section id="s12">
+  <span class="sec-no">SECTION 12</span>
+  <h2>Roadmap &amp; Launch Checklist</h2>
+  <table>
+    <tr><th>Milestone</th><th>Scope</th><th>Timeline</th></tr>
+    <tr><td><b>MVP (V1)</b></td><td>Screens S1–S16 · Sem 1–8 shells · ~60 curated notes (Sem 1 + Pharma II + NDDS + Biostatistics) · 50 drugs · 40 PYQs · Scanner with strict rule · Premium ₹499/₹99/₹49 · PWA + stores</td><td>Weeks 1–6</td></tr>
+    <tr><td><b>V1.1</b></td><td>Full content pass: all 43 subjects (priority: Pharmacology I–III, Pharmacognosy I–II, Pharmaceutics I, HAP I–II) · flashcards everywhere · Hindi (Devanagari) notes batch</td><td>Weeks 7–10</td></tr>
+    <tr><td><b>V2</b></td><td>FlutterFlow + Supabase rebuild · offline packs · in-app quiz engine (MCQ practice per unit, RUHS-style) · community Q&amp;A per unit · Hindi audio summaries</td><td>Month 3–4</td></tr>
+    <tr><td><b>V3</b></td><td>Other PCI universities (RTU, MCI-aligned colleges) · D.Pharm track · teacher/admin CMS panel for content upload</td><td>Month 5+</td></tr>
+  </table>
+
+  <h3>12.1 Launch checklist (30 items, condensed)</h3>
+  <ul class="check">
+    <li>20-image scanner test battery passes strict-rule acceptance (18/20 clean extraction, 100% hallucination rejection).</li>
+    <li>Content QA: every note passes the 7-point checklist (§10.1).</li>
+    <li>Razorpay test-mode checkout: success + failure + webhook + refund paths verified.</li>
+    <li>Premium gate verified: free user sees locks; paid user sees content; expiry locks again.</li>
+    <li>Bilingual toggle: EN ⇄ Hinglish instant switch verified on all 16 screens.</li>
+    <li>Night Study theme contrast passes (WCAG AA on text).</li>
+    <li>Privacy policy, terms, refund policy pages (required by Play Store).</li>
+    <li>Analytics events wired: signup, toggle usage, scanner start/complete, premium click/purchase.</li>
+    <li>500-seat beta via RUHS college WhatsApp groups → fix → public launch.</li>
+  </ul>
+
+  <div class="callout green"><b>One-line summary for stakeholders:</b> "A 16-screen, 17-table, no-code B.Pharm exam app — semester-first navigation, point-wise bilingual notes, an AI scanner that only answers what's in your screenshot, and a premium vault — shippable on Glide in 6 weeks, upgradeable to native on FlutterFlow."</div>
+</section>
+
+<div class="foot">
+  <b>PharmaPath — B.Pharm Exam Companion · Design Specification v1.0</b><br>
+  Prepared for the RUHS B.Pharm student community · 18 Aug 2026 · Companion files: <b>BPharm_App_Prototype.html</b> (clickable wireframe demo) · <b>schema.sql</b> (ready-to-run database)
+</div>
+
+</div><!-- /wrap -->
+</body>
+</html>
