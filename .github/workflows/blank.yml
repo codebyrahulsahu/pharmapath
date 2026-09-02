@@ -2,7 +2,7 @@ name: Deploy PharmaPath PWA to GitHub Pages
 
 on:
   push:
-    branches: ["main", "arena/**"]
+    branches: ["main"]
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages.
@@ -37,14 +37,19 @@ jobs:
       #   • site missing            → POST /repos/{owner}/{repo}/pages
       #   • site on a branch source → PUT  /repos/{owner}/{repo}/pages
       #
-      # If the token in play is not allowed to manage Pages (the default
-      # GITHUB_TOKEN usually is not, see actions/configure-pages#40), the step
-      # stops the job in ~5 seconds with the exact one-time fix written to the
-      # job summary, instead of letting `deploy-pages` hang and time out.
+      # Verified on this repo: neither the GITHUB_TOKEN nor a GitHub App token
+      # may create/change a Pages site — both get HTTP 403 (see
+      # actions/configure-pages#40). Only a classic PAT with the `repo` scope
+      # can. So when that privileged token is absent this step stops the job in
+      # ~5 seconds with the exact one-time fix in the job summary, instead of
+      # letting `deploy-pages` hang until it times out.
       #
       # Optional automation: add a repository secret `PAGES_ENABLE_TOKEN`
       # (classic PAT with the `repo` scope) and this workflow maintains the
       # Pages site on its own — no Settings click ever needed.
+      #
+      # Note: the `github-pages` environment restricts deployments to the
+      # default branch, so this job only ever publishes from `main`.
       # ───────────────────────────────────────────────────────────────────────
       - name: Verify / enable GitHub Pages
         id: pages
