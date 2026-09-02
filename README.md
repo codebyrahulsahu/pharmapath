@@ -52,6 +52,12 @@ pharmapath/
 ### 2. Run the prototype in a browser
 Open `app/index.html` — clickable demo of all 16 screens.
 
+**Live site:** <https://codebyrahulsahu.github.io/pharmapath/>. GitHub Pages
+currently publishes the repository root from `main`; the root `index.html`
+forwards visitors to the PWA in `app/`. The Actions workflow validates the
+static files on pull requests and pushes without requiring privileged Pages
+settings.
+
 ### 3. Install as a PWA (Android/Chrome)
 Host the `app/` folder on any static host (GitHub Pages, Netlify, Vercel) →
 open the URL → browser menu → **"Add to Home screen"** → it behaves like an app.
