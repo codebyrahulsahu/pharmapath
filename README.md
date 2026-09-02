@@ -78,6 +78,30 @@ Follow **Section 8** of the spec — 10 phases, Glide + Google Sheets + Make.com
 
 ---
 
+## 🌐 Live PWA (GitHub Pages)
+
+The `app/` folder is published automatically to
+**<https://codebyrahulsahu.github.io/pharmapath/>** by
+[`.github/workflows/blank.yml`](.github/workflows/blank.yml) on every push to
+`main`.
+
+### One-time setup (required before the first deploy works)
+
+`actions/deploy-pages` can only publish when the Pages site exists **and** its
+build source is **GitHub Actions**. If it is missing, the run fails with
+`Get Pages site failed … Not Found`.
+
+1. Open **Settings → Pages** → <https://github.com/codebyrahulsahu/pharmapath/settings/pages>
+2. Under **Build and deployment → Source**, choose **GitHub Actions**
+3. **Save**, then **Re-run failed jobs**
+
+> The `PAGES_ENABLE_TOKEN` route: add a repository secret with a classic PAT
+> (`repo` scope) and the workflow creates/repairs the Pages site on its own —
+> no Settings click needed. The default `GITHUB_TOKEN` cannot do this
+> ([actions/configure-pages#40](https://github.com/actions/configure-pages/issues/40)).
+
+---
+
 ## 🛠 Rebuilding the APK
 
 ```bash

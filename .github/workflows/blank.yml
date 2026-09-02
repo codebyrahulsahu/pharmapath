@@ -6,10 +6,6 @@ on:
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages.
-# Note: the Pages site must be created ONCE (Settings > Pages > Save) by the
-# repository owner - the Actions GITHUB_TOKEN is not permitted to create Pages
-# sites (see actions/configure-pages#40). After that, this workflow deploys
-# automatically on every push to main.
 permissions:
   contents: read
   pages: write
@@ -31,8 +27,97 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # ───────────────────────────────────────────────────────────────────────
+      # `deploy-pages` can only publish when a Pages site exists AND is set to
+      # the "GitHub Actions" build source. Until then the REST call in
+      # `configure-pages` returns 404 ("Get Pages site failed ... Not Found"),
+      # which is exactly what run 33622071601 died on.
+      #
+      # This step repairs that state before anything else runs:
+      #   • site missing            → POST /repos/{owner}/{repo}/pages
+      #   • site on a branch source → PUT  /repos/{owner}/{repo}/pages
+      #
+      # If the token in play is not allowed to manage Pages (the default
+      # GITHUB_TOKEN usually is not, see actions/configure-pages#40), the step
+      # stops the job in ~5 seconds with the exact one-time fix written to the
+      # job summary, instead of letting `deploy-pages` hang and time out.
+      #
+      # Optional automation: add a repository secret `PAGES_ENABLE_TOKEN`
+      # (classic PAT with the `repo` scope) and this workflow maintains the
+      # Pages site on its own — no Settings click ever needed.
+      # ───────────────────────────────────────────────────────────────────────
+      - name: Verify / enable GitHub Pages
+        id: pages
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_ENABLE_TOKEN || secrets.GITHUB_TOKEN }}
+          TOKEN_KIND: ${{ secrets.PAGES_ENABLE_TOKEN != '' && 'PAGES_ENABLE_TOKEN' || 'GITHUB_TOKEN' }}
+        run: |
+          set -uo pipefail
+
+          API="repos/${GITHUB_REPOSITORY}/pages"
+          SITE="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY##*/}/"
+
+          instruct() {
+            {
+              echo "### ❌ GitHub Pages is not ready for this deployment"
+              echo ""
+              echo "$1"
+              echo ""
+              echo "#### One-time fix (~20 seconds)"
+              echo "1. Open **Settings → Pages** → https://github.com/${GITHUB_REPOSITORY}/settings/pages"
+              echo "2. Under **Build and deployment → Source**, choose **GitHub Actions**."
+              echo "3. Click **Save**, then press **Re-run failed jobs** on this run."
+              echo ""
+              echo "#### Prefer it fully automatic?"
+              echo "Add a repository secret named \`PAGES_ENABLE_TOKEN\` holding a classic PAT with the"
+              echo "\`repo\` scope (Settings → Secrets and variables → Actions → New repository secret)."
+              echo "With that secret this workflow creates and repairs the Pages site by itself, forever."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::$1"
+            exit 1
+          }
+
+          echo "Checking GitHub Pages configuration for ${GITHUB_REPOSITORY} (using ${TOKEN_KIND})…"
+          if body=$(gh api "$API" 2>/tmp/gh-err.txt); then
+            build_type=$(printf '%s' "$body" | jq -r '.build_type // "unknown"')
+            source_branch=$(printf '%s' "$body" | jq -r '.source.branch // "-"')
+            echo "Pages site exists: build_type=${build_type} branch=${source_branch}"
+            [ "$build_type" = "workflow" ] && echo "✅ Pages is already building from GitHub Actions."
+          else
+            build_type="none"
+            echo "No Pages site found yet for ${GITHUB_REPOSITORY}."
+          fi
+
+          if [ "$build_type" != "workflow" ]; then
+            if [ "$build_type" = "none" ]; then
+              method="POST"; what="create the Pages site"
+            else
+              method="PUT"; what="switch the Pages source to GitHub Actions"
+            fi
+            echo "Attempting to ${what} (${method} ${API})…"
+            if gh api --method "$method" "$API" -f build_type=workflow >/dev/null 2>/tmp/gh-err.txt; then
+              echo "✅ ${what} succeeded — Pages now builds from GitHub Actions."
+            else
+              reason=$(tr -d '\n' < /tmp/gh-err.txt | tail -c 300)
+              if [ "$build_type" = "none" ]; then
+                instruct "No GitHub Pages site exists for this repository and \`${TOKEN_KIND}\` is not allowed to create one, so \`deploy-pages\` has nothing to publish to. (${reason})"
+              else
+                instruct "GitHub Pages here is still configured to build from the \`${source_branch}\` branch (build_type=${build_type}), and \`${TOKEN_KIND}\` is not allowed to change it, so \`deploy-pages\` cannot publish the PWA. (${reason})"
+              fi
+            fi
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Live URL after deployment: ${SITE}" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Setup Pages
+        id: configure
         uses: actions/configure-pages@v6
+        with:
+          # Only ask the action to create the site when a privileged token is
+          # available; with GITHUB_TOKEN the enablement call would 403.
+          enablement: ${{ secrets.PAGES_ENABLE_TOKEN != '' }}
+          token: ${{ secrets.PAGES_ENABLE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Upload app/ as Pages artifact
         uses: actions/upload-pages-artifact@v4
@@ -42,3 +127,16 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          {
+            echo "## 💊 PharmaPath PWA"
+            echo ""
+            echo "- Job: \`${{ job.status }}\`"
+            echo "- Source: \`app/\` (index.html · sw.js · manifest.webmanifest · icons)"
+            echo "- URL: ${{ steps.deployment.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}"
+            echo ""
+            echo "Offline-first: the service worker caches the whole shell, so the PWA works with no network after the first visit."
+          } >> "$GITHUB_STEP_SUMMARY"
